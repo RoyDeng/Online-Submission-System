@@ -1,0 +1,258 @@
+@extends('layouts.master')
+
+@section('title','Send Revision Invitation')
+
+@section('content')
+@include('conference.editor.partials.nav')
+<div class="row wrapper border-bottom white-bg page-heading">
+	<div class="col-sm-4">
+		<h2>Send Revision Invitation</h2>
+		<ol class="breadcrumb">
+            <li>
+                {{$revision -> final_decision -> manuscript -> topic -> conference -> title}}
+            </li>
+            <li>
+                {{$revision -> final_decision -> manuscript -> topic -> title}}
+            </li>
+            <li>
+                {{$revision -> final_decision -> manuscript -> title}}
+            </li>
+            <li>
+				Send Revision Invitation
+			</li>
+		</ol>
+	</div>
+</div>
+<div class="wrapper wrapper-content">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Manuscript Information</h5>
+                </div>
+                <div>
+                    <div class="ibox-content">
+                        <table class="table table-bordered">
+                            <tbody>
+                                <tr>
+                                    <th>Author</th>
+                                    <td>
+                                        <h4>{{ $revision -> final_decision -> manuscript -> author -> title }}{{ $revision -> final_decision -> manuscript -> author -> firstname }} {{ $revision -> final_decision -> manuscript -> author -> middlename }} {{ $revision -> final_decision -> manuscript -> author -> lastname }}</h4>
+                                        <p>
+                                            <i class="fa fa-university"></i> {{ $revision -> final_decision -> manuscript -> author -> institution }}
+                                        </p>
+                                        <p>
+                                            <i class="fa fa-globe"></i> {{ $revision -> final_decision -> manuscript -> author -> country }}
+                                        </p>
+                                        <p>
+                                            <i class="fa fa-phone"></i> {{ $revision -> final_decision -> manuscript -> author -> tel }}
+                                        </p>
+                                        <p>
+                                            <i class="fa fa-envelope"></i> {{ $revision -> final_decision -> manuscript -> author -> email }}
+                                        </p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>Number</th>
+                                    <td>{{$revision -> final_decision -> manuscript -> number}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Submission Type</th>
+                                    <td>{{$revision -> final_decision -> manuscript -> submission_type -> name}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Title</th>
+                                    <td>{{$revision -> final_decision -> manuscript -> title}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Abstract</th>
+                                    <td>{{$revision -> final_decision -> manuscript -> abstract}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Files</th>
+                                    <td>
+                                        <ul class="list-unstyled file-list">
+                                            @foreach ($revision -> revised_manuscript -> revised_file as $file)
+                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}.{{$file -> type}}</a></li>
+                                            @endforeach
+                                        </ul>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Selected Reviewers</h5>
+                </div>
+                <div>
+                    <div class="ibox-content">
+                        @if ($revision -> revised_manuscript -> re_invitation != '')
+                            <div style="max-height: 250px; overflow-y:scroll;">
+                                <ul class="list-group elements-list">
+                                    @foreach ($revision -> revised_manuscript -> re_invitation as $invation)
+                                        <li class="list-group-item">
+                                            <small class="pull-right text-muted"> {{$invation -> added_time}}</small>
+                                            <strong>{{ $invation -> reviewer -> title }}{{ $invation -> reviewer -> firstname }} {{ $invation -> reviewer -> middlename }} {{ $invation -> reviewer -> lastname }}</strong>
+                                            <div class="small m-t-xs">
+                                                <p>
+                                                    <i class="fa fa-university"></i> {{ $invation -> reviewer -> institution }}
+                                                </p>
+                                                <p>
+                                                    <i class="fa fa-globe"></i> {{ $invation -> reviewer -> country }}
+                                                </p>
+                                                <p>
+                                                    <i class="fa fa-phone"></i> {{ $invation -> reviewer -> tel }}
+                                                </p>
+                                                <p>
+                                                    <i class="fa fa-envelope"></i> {{ $invation -> reviewer -> email }}
+                                                </p>
+                                            </div>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @else
+                            <div class="alert alert-danger alert-dismissible fade in">
+                                <strong>You haven't selected any reviewer!</strong>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @if ($msg = Session::get('success'))
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="alert alert-success alert-dismissible fade in">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+					<strong>{{ $msg }}</strong>
+				</div>
+			</div>
+		</div>
+	@endif
+    @if ($msg = Session::get('warn'))
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="alert alert-warning alert-dismissible fade in">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+					<strong>{{ $msg }}</strong>
+				</div>
+			</div>
+		</div>
+	@endif
+    @if ($msg = Session::get('danger'))
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="alert alert-danger alert-dismissible fade in">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+					<strong>{{ $msg }}</strong>
+				</div>
+			</div>
+		</div>
+	@endif
+	<div class="row">
+        <div class="col-lg-12">
+            <div class="table-responsive">
+				<table class="table table-striped table-bordered table-hover dataTables-example">
+					<thead>
+						<tr>
+							<th>No.</th>
+							<th>Information</th>
+							<th>Status</th>
+							<th>Actions</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach ($reviewers as $r => $reviewer)
+							<tr>
+								<td>{{ $r + 1 }}</td>
+								<td>
+									<h4>{{ $reviewer -> title }}{{ $reviewer -> firstname }} {{ $reviewer -> middlename }} {{ $reviewer -> lastname }}</h4>
+									<p>
+										<i class="fa fa-university"></i> {{ $reviewer -> institution }}
+									</p>
+									<p>
+										<i class="fa fa-globe"></i> {{ $reviewer -> country }}
+									</p>
+									<p>
+										<i class="fa fa-phone"></i> {{ $reviewer -> tel }}
+									</p>
+									<p>
+										<i class="fa fa-envelope"></i> {{ $reviewer -> email }}
+									</p>
+								</td>
+								<td>
+                                    <p>
+                                        <b>Pending:</b> {{ count($reviewer -> invitation -> where('status', 0)) + count($reviewer -> re_invitation -> where('status', 0)) }}
+									</p>
+                                    <p>
+                                        <b>Accepted:</b> {{ count($reviewer -> invitation -> where('status', 1)) + count($reviewer -> re_invitation -> where('status', 1)) }}
+									</p>
+                                    <p>
+                                        <b>Rejected:</b> {{ count($reviewer -> invitation -> where('status', 2)) + count($reviewer -> re_invitation -> where('status', 2)) }}
+									</p>
+								</td>
+								<td>
+                                    <button type="button" class="btn btn-success" data-target="#ConfirmReviewer" data-toggle="modal" onclick="GetReviewer('{{ $reviewer -> id }}')"><i class="fa fa-check"></i></button>
+								</td>
+							</tr>
+						@endforeach
+					</tbody>
+				</table>
+			</div>
+		</div>
+	</div>
+	<div class="footer">
+		<div>
+			Copyright © {{ date("Y") }} Chung Yuan Christian University All Rights
+		</div>
+	</div>
+</div>
+<div class="modal fade col-xs-12" id="ConfirmReviewer" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+				<h4 class="modal-title">Send Invitation to the Reviewer</h4>
+			</div>
+			<div class="modal-body">
+				<i class="fa fa-question-circle fa-lg"></i>  
+				Do you want to send invitation to the reviewer?
+				<form action="{{ url('conference/editor/send_re_invitation') }}" method="post">
+					{{ csrf_field() }}
+                    <div class="form-group">
+						<label class="form-label" for="deadline">Deadline</label>
+						<div class="controls">
+							<input class="form-control deadline" id="deadline" name="deadline" required>
+						</div>
+					</div>
+                    <input type="hidden" name="revised_manuscript_id" value="{{$revision -> revised_manuscript -> id}}">
+					<input type="hidden" id="invite_reviewer_id" name="reviewer_id">
+					<button type="submit" class="btn btn-success">Confirm</button>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button data-dismiss="modal" class="btn btn-danger" type="button">Cancel</button>
+			</div>
+		</div>
+	</div>
+</div>
+<script type="text/javascript">
+	function GetReviewer(id) {
+		$.ajax({
+			url: '{{ url('conference/editor/get_reviewer') }}',
+			type:'GET',
+			data: {'id':id},
+			success: function(result) {
+				$('#invite_reviewer_id').val(result.id);
+			}
+		});
+	}
+</script>
+@stop
