@@ -21,7 +21,7 @@
 	</div>
 	<div class="col-sm-8">
 		<div class="title-action">
-			<button type="button" class="btn btn-primary" data-target="#CreateEditor" data-toggle="modal">Create a Chair</button>
+			<button type="button" class="btn btn-primary" data-target="#CreateEditor" data-toggle="modal">Create a Editor</button>
 		</div>
 	</div>
 </div>
