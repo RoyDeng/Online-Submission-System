@@ -16,22 +16,17 @@
                                 <table  cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td class="content-block">
-                                            <h3>Welcom to Online Submission System</h3>
+                                            <h3>Welcome to Online Submission and Review System</h3>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="content-block">
-                                            Hi, {{ $title }}{{ $firstname }} {{ $middlename }} {{ $lastname }}: 
+                                            Hi, {{ $title }} {{ $firstname }} {{ $middlename }} {{ $lastname }}: 
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="content-block">
                                             Your author account has been successfully registered!
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td class="content-block aligncenter">
-                                            <a href="{{url('author/login')}}" class="btn-primary">Author Login</a>
                                         </td>
                                     </tr>
                                 </table>

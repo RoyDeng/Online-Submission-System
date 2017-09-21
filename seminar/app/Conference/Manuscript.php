@@ -15,7 +15,7 @@ class Manuscript extends Model {
     public $timestamps = false;
     
     protected $fillable = [
-        'title', 'abstract'
+        'type', 'title', 'abstract'
     ];
 
     //稿件屬於某題目
@@ -40,7 +40,7 @@ class Manuscript extends Model {
 
     //稿件有一筆邀請
     public function invitation() {
-        return $this -> hasOne(InvitationEloquent::class);
+        return $this -> hasMany(InvitationEloquent::class);
     }
 
     //稿件有一筆決定

@@ -10,7 +10,7 @@
 	<div class="middle-box text-center loginscreen">
 		<div>
 			<h3>Mintainer Login</h3>
-			<form class="m-t" role="form"  action="{{ url('admin/login') }}" method="post">
+			<form class="m-t" role="form" action="{{ url('admin/login') }}" method="post">
 				{{ csrf_field() }}
 				<div class="form-group">
 					<input type="email" class="form-control" name="email" placeholder="Email" required>

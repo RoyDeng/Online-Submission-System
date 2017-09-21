@@ -12,6 +12,10 @@
             <div class="col-md-6">
                 <h2 class="font-bold">Welcome to {{$conference -> title}}</h2>
                 <h3>Chair Login</h3>
+                <p>To change the login role, select an available role from the list.</p>
+                <a class="btn btn-primary block full-width m-b" href="{{url('conference/author/login')}}/{{$conference -> number}}">Author Login</a>
+                <a class="btn btn-primary block full-width m-b" href="{{url('conference/reviewer/login')}}/{{$conference -> number}}">Reviewer Login</a>
+                <a class="btn btn-primary block full-width m-b" href="{{url('conference/editor/login/topics')}}/{{$conference -> number}}">Editor Login</a>
             </div>
             <div class="col-md-6">
                 <div class="ibox-content">
@@ -41,6 +45,12 @@
                     </form>
                     <p class="m-t"> <small>Copyright © {{ date("Y") }} Chung Yuan Christian University All Rights</small> </p>
                 </div>
+            </div>
+        </div>
+        <hr/>
+        <div class="row">
+            <div class="col-md-12">
+                <i class="fa fa-envelope"></i> {{$maintainer -> email}}
             </div>
         </div>
     </div>

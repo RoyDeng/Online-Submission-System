@@ -35,7 +35,7 @@
 			</div>
 			<ul class="nav navbar-top-links navbar-right">
 				<li>
-					<span class="m-r-sm text-muted welcome-message">Welcome to Online Submission System.</span>
+					<span class="m-r-sm text-muted welcome-message">Welcome to Online Submission and Review System.</span>
 				</li>
 				<li>
 					<a href="{{ url('admin/logout') }}">

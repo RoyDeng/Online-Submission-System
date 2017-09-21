@@ -37,7 +37,7 @@
                                 <tr>
                                     <th>Author</th>
                                     <td>
-                                        <h4>{{ $manuscript -> author -> title }}{{ $manuscript -> author -> firstname }} {{ $manuscript -> author -> middlename }} {{ $manuscript -> author -> lastname }}</h4>
+                                        <h4>{{ $manuscript -> author -> title }} {{ $manuscript -> author -> firstname }} {{ $manuscript -> author -> middlename }} {{ $manuscript -> author -> lastname }}</h4>
                                         <p>
                                             <i class="fa fa-university"></i> {{ $manuscript -> author -> institution }}
                                         </p>
@@ -61,6 +61,16 @@
                                     <td>{{$manuscript -> submission_type -> name}}</td>
                                 </tr>
                                 <tr>
+                                    <th>Presentation Type</th>
+                                    <td>
+                                        @if ($manuscript -> type == 0)
+											Oral
+										@else
+                                            Poster
+										@endif
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th>Title</th>
                                     <td>{{$manuscript -> title}}</td>
                                 </tr>
@@ -73,7 +83,7 @@
                                     <td>
                                         <ul class="list-unstyled file-list">
                                             @foreach ($manuscript -> file as $file)
-                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}.{{$file -> type}}</a></li>
+                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}</a></li>
                                             @endforeach
                                         </ul>
                                     </td>
@@ -108,14 +118,18 @@
                                 <td>{{ $rev -> deadline }}</td>
                                 <td>
                                     @if ($rev -> revised_manuscript != '')
-                                        @if ($rev -> status == 0)
-                                            <span class="label label-danger">Not yet decided</span>
-                                        @elseif ($rev -> status == 1)
-                                            <span class="label label-success">Passed</span>
-                                        @elseif ($rev -> status == 2)
-                                        <span class="label label-danger">Rejected</span>
+                                        @if ($rev -> revised_manuscript -> re_decision == '')
+                                            <span class="label label-danger">Not yet received decision</span>
                                         @else
-                                            <span class="label label-warning">Revision is needed</span>
+                                            @if ($rev -> status == 0)
+                                                <span class="label label-danger">Not yet decided</span>
+                                            @elseif ($rev -> status == 1)
+                                                <span class="label label-success">Passed</span>
+                                            @elseif ($rev -> status == 2)
+                                            <span class="label label-danger">Rejected</span>
+                                            @else
+                                                <span class="label label-warning">Revision is needed</span>
+                                            @endif
                                         @endif
                                     @else
                                         <span class="label label-danger">Not yet received revision</span>

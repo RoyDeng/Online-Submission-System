@@ -13,6 +13,7 @@ use App\Conference\SubmissionType;
 use App\Conference\ConferenceType;
 use App\Conference\Chair;
 use App\Author;
+use App\Maintainer;
 
 class MaintainerController extends Controller {
     //研討會頁面
@@ -27,7 +28,7 @@ class MaintainerController extends Controller {
     public function CreateConference(Request $request) {
         $conference = new Conference;
         $conference -> title = $request -> title;
-        $conference -> number = $request -> abbr.'-'.date("Y");
+        $conference -> number = $request -> number;
         $conference -> exist_deadline = $request -> deadline;
         $conference -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
         $conference -> save();
@@ -55,6 +56,8 @@ class MaintainerController extends Controller {
     public function EditConference(Request $request) {
         //取得主鍵符合id的研討會
         $conference = Conference::find($request -> id);
+        $conference -> title = $request -> title;
+        $conference -> number = $request -> number;
         $conference -> exist_deadline = $request -> deadline;
         $conference -> modified_time = Carbon::now() -> format('Y-m-d H:i:s');
         $conference -> save();
@@ -120,8 +123,8 @@ class MaintainerController extends Controller {
                 'conference' => $chair -> conference -> title,
                 'number' => $chair -> conference -> number
             ];
-            Mail::send('email.create_chair', $data, function($message) use ($to) {
-                $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Chair Registration Successful');
+            Mail::send('email.conference.create_chair', $data, function($message) use ($to) {
+                $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Chair Registration Successful');
             });
             return back() -> with('success', 'You have successfully created a chair!');
         }
@@ -179,6 +182,46 @@ class MaintainerController extends Controller {
         return view('admin.profile');
     }
 
+    public function EditProfile(Request $request) {
+        $maintainer = Auth::user();
+        $maintainer -> name = $request -> name;
+        $maintainer -> save();
+        return back() -> with('success', 'You have successfully updated your profile!');
+    }
+
+    //變更Email操作
+    public function ChangeEmail(Request $request) {
+        //透過Auth來存取認證的管理員資料
+         $maintainer = Auth::user();
+        //判斷確認Email是否符合新Email
+        if ($request -> confirm_email == $request -> new_email) {
+            //判斷目前Email是否符合管理員的Email
+            if ($request -> current_email != $maintainer -> email) return back() -> with('danger', 'Your current email is incorrect!');
+            else {
+                //產生長度6的隨機字串為新密碼
+                $new_password = str_random(6);
+                //更改管理員的Email及密碼，然後使用save方法
+                $maintainer -> email = $request -> new_email;
+                //使用Bcrypt加密來保存新密碼
+                $maintainer -> password = bcrypt($new_password);
+                $maintainer -> save();
+                //寄信通知已被指派為管理員
+                $to = [
+                    'email' => $maintainer -> email,
+                    'name' => $maintainer -> name
+                ];
+                $data = [
+                    'name' => $maintainer -> name,
+                    'password' => $new_password
+                ];
+                Mail::send('email.assign_maintainer', $data, function($message) use ($to) {
+                    $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Assigned as Maintainer');
+                });
+                return back() -> with('success', 'You have successfully changed your email!');
+            }
+        } else return back() -> with('warn', 'Your email and confirm email do not match!');
+    }
+
     //變更密碼操作
     public function ChangePassword(Request $request) {
         //透過Auth來存取認證的管理員資料
@@ -188,7 +231,7 @@ class MaintainerController extends Controller {
             //目前密碼必須符合管理員的密碼
             if (!Hash::check($request -> current_password, $maintainer -> password)) return back() -> with('danger', 'Your current password is incorrect!');
             else {
-                $maintainer -> password =  bcrypt($request -> new_password);
+                $maintainer -> password = bcrypt($request -> new_password);
                 $maintainer -> save();
                 return back() -> with('success', 'You have successfully changed your password!');
             }
@@ -200,11 +243,12 @@ class MaintainerController extends Controller {
         return view('contact');
     }
 
-    //聯絡我們操作(寄信給教授)
+    //聯絡我們操作(寄信給管理員)
     public function Contact(Request $request) {
+        $maintainer = Maintainer::find(1);
         $to = [
-            'email' => 'hcweng@cycu.edu.tw',
-            'name' => 'Huei Chu Weng'
+            'email' => $maintainer -> email,
+            'name' => $maintainer -> name
         ];
         $data = [
             'title' => $request -> title,
@@ -218,7 +262,7 @@ class MaintainerController extends Controller {
             'content' => $request -> content
         ];
         Mail::send('email.contact_us', $data, function($message) use ($to) {
-            $message -> to($to['email'], $to['name']) -> subject('Online Submission System');
+            $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System');
         });
         return back() -> with('success', 'You have successfully sent your problem!');
     }

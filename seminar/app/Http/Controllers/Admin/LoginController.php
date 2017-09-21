@@ -53,7 +53,7 @@ class LoginController extends Controller {
 			];
 			//使用Mail::send方法來寄送電子郵件，第一個參數為郵件視圖的名稱，第二個是傳遞給該視圖的資料，通常是一個關聯式陣列，讓視圖可透過鍵值來取得資料項目，第三個參數是一個閉包，可以對訊息進行各種設定
 			Mail::send('email.maintainer_forgot_password', $data, function($message) use ($to) {
-				$message -> to($to['email'], $to['name']) -> subject('Online Submission System - Maintainer Password Changed Successfully');
+				$message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Maintainer Password Changed Successfully');
 			});
 			//返回前一個URL，同時加上快閃訊息(一次性Session)，第一個參數是鍵值，第二個參數是數值
 			return back() -> with('success', 'A password reset email has been sent!');

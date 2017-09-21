@@ -19,10 +19,10 @@
 				</div>
 			</li>
 			<li>
-				<a href="{{ url('conference/reviewer') }}"><i class="fa fa-envelope"></i> <span class="nav-label">Invitations</span></a>
+				<a href="{{ url('conference/reviewer') }}"><i class="fa fa-envelope"></i> <span class="nav-label">Invitations</span>@if ($pending > 0) <span class="label label-warning pull-right">{{$pending}} @endif</span></a>
 			</li>
 			<li>
-				<a href="{{ url('conference/reviewer/re_invitations') }}"><i class="fa fa-envelope"></i> <span class="nav-label">Revision Invitations</span></a>
+				<a href="{{ url('conference/reviewer/re_invitations') }}"><i class="fa fa-envelope"></i> <span class="nav-label">Revision Invitations</span>@if ($re_pending > 0) <span class="label label-warning pull-right">{{$re_pending}} @endif</a>
 			</li>
 		</ul>
 	</div>
@@ -35,7 +35,7 @@
 			</div>
 			<ul class="nav navbar-top-links navbar-right">
 				<li>
-					<span class="m-r-sm text-muted welcome-message">Welcome to Online Submission System.</span>
+					<span class="m-r-sm text-muted welcome-message">Welcome to Online Submission and Review System.</span>
 				</li>
 				<li>
 					<a href="{{ url('conference/reviewer/logout') }}">

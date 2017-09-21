@@ -65,7 +65,7 @@
 							<tr>
 								<td>{{ $r + 1 }}</td>
 								<td>
-									<h4>{{ $reviewer -> title }}{{ $reviewer -> firstname }} {{ $reviewer -> middlename }} {{ $reviewer -> lastname }}</h4>
+									<h4>{{ $reviewer -> title }} {{ $reviewer -> firstname }} {{ $reviewer -> middlename }} {{ $reviewer -> lastname }}</h4>
 									<p>
 										<i class="fa fa-university"></i> {{ $reviewer -> institution }}
 									</p>

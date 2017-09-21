@@ -33,6 +33,8 @@ Route::group(['middleware' => ['auth:admin'], 'prefix' => 'admin'], function() {
 
     //個人資料
     Route::get('profile', 'Admin\MaintainerController@Profile');
+    Route::post('edit_profile', 'Admin\MaintainerController@EditProfile');
+    Route::post('change_email', 'Admin\MaintainerController@ChangeEmail');
     Route::post('change_password', 'Admin\MaintainerController@ChangePassword');
 });
 
@@ -85,6 +87,7 @@ Route::prefix('conference')->group(function () {
     });
 
     //Editor登入的路徑
+    Route::get('editor/login/topics/{number}', 'Conference\Editor\LoginController@TopicsPage');
     Route::get('editor/login/{number}', 'Conference\Editor\LoginController@LoginPage') -> name('editor.login');
     Route::post('editor/login', 'Conference\Editor\LoginController@login');
     Route::get('editor/forgot_password/{number}', 'Conference\Editor\LoginController@ForgotPasswordPage');
@@ -165,8 +168,8 @@ Route::prefix('conference')->group(function () {
 });
 
 //Author登入的路徑
-Route::get('author/login', 'Author\LoginController@LoginPage') -> name('login');
-Route::post('author/login', 'Author\LoginController@login');
+Route::get('conference/author/login/{number}', 'Author\LoginController@LoginPage') -> name('login');
+Route::post('conference/author/login', 'Author\LoginController@login');
 Route::get('author/forgot_password', 'Author\LoginController@ForgotPasswordPage');
 Route::post('author/reset_password', 'Author\LoginController@ResetPassword');
 Route::get('author/register', 'Author\LoginController@RegisterPage') -> name('register');
@@ -175,23 +178,26 @@ Route::post('author/register', 'Author\LoginController@register');
 //需要驗證的路徑
 Route::group(['middleware' => ['auth:author'], 'prefix' => 'author'], function() {
     //登出
-    Route::get('logout', 'Author\LoginController@logout') -> name('author.logout');
+    Route::get('logout/{number}', 'Author\LoginController@logout') -> name('author.logout');
 
-    //研討會
-    Route::get('/', 'Author\AuthorController@Conferences') -> name('author');
-    Route::get('conference/topic_list/{id}', 'Author\AuthorController@TopicList');
+    //題目
+    Route::get('conference/{number}', 'Author\AuthorController@Topics') -> name('author');
 
     //稿件
-    Route::get('conference/upload_manuscript', 'Author\AuthorController@UploadManuscriptPage');
+    Route::get('conference/upload_manuscript/{number}', 'Author\AuthorController@UploadManuscriptPage');
     Route::post('conference/upload_manuscript', 'Author\AuthorController@UploadManuscript');
-    Route::get('conference/manuscripts', 'Author\AuthorController@Manuscripts');
+    Route::get('conference/get_manuscript/{id}', 'Author\AuthorController@GetManuscript');
+    Route::get('conference/manuscripts/{number}', 'Author\AuthorController@Manuscripts');
+    Route::post('conference/delete_manuscript', 'Author\AuthorController@DeleteManuscript');
     Route::get('conference/manuscript/{number}', 'Author\AuthorController@Manuscript');
+    Route::get('conference/get_review/{id}', 'Author\AuthorController@GetReview');
     Route::get('conference/upload_revision/{id}', 'Author\AuthorController@UploadRevisionPage');
     Route::post('conference/upload_revision', 'Author\AuthorController@UploadRevision');
     Route::get('conference/revision/{id}', 'Author\AuthorController@Revision');
+    Route::get('conference/get_re_review/{id}', 'Author\AuthorController@GetReReview');
 
     //個人資料
-    Route::get('profile', 'Author\AuthorController@Profile');
+    Route::get('conference/profile/{number}', 'Author\AuthorController@Profile');
     Route::post('edit_profile', 'Author\AuthorController@EditProfile');
     Route::post('change_password', 'Author\AuthorController@ChangePassword');
 });

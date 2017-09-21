@@ -5,6 +5,7 @@ namespace App\Exceptions;
 use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use App\Conference\Conference;
 
 class Handler extends ExceptionHandler
 {
@@ -56,15 +57,13 @@ class Handler extends ExceptionHandler
      */
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        if ($request->expectsJson()) {
-            return response()->json(['error' => 'Unauthenticated.'], 401);
+        if ($request -> expectsJson()) {
+            return response() -> json(['error' => 'Unauthenticated.'], 401);
         }
 
         //驗證失敗時所要轉址的路徑
         if (preg_match('/^admin/', $request -> path())) {
 			return redirect() -> guest(route('admin.login'));
-		}
-
-        return redirect()->guest(route('login'));
+        }
     }
 }

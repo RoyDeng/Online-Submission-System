@@ -9,6 +9,7 @@ use Hash;
 use Mail;
 use App\Conference\Conference;
 use App\Conference\Reviewer;
+use App\Maintainer;
 
 class LoginController extends Controller {
     use AuthenticatesUsers;
@@ -20,7 +21,8 @@ class LoginController extends Controller {
 
     function LoginPage($number) {
 		$conference = Conference::where('number', $number) -> first();
-		if ($conference -> exist_deadline > date('Y-m-d') && $conference -> status == 1) return view('conference.reviewer.login', ['conference' => $conference]);
+		$maintainer = Maintainer::find(1);
+		if ($conference -> exist_deadline > date('Y-m-d') && $conference -> status == 1) return view('conference.reviewer.login', ['conference' => $conference, 'maintainer' => $maintainer]);
 		else return view('expire_page');
 	}
 
@@ -49,8 +51,8 @@ class LoginController extends Controller {
 				'password' => $new_password,
 				'number' => $reviewer -> conference -> number
 			];
-			Mail::send('email.reviewer_forgot_password', $data, function($message) use ($to) {
-				$message -> to($to['email'], $to['name']) -> subject('Online Submission System - Reviewer Password Changed Successfully');
+			Mail::send('email.conference.reviewer_forgot_password', $data, function($message) use ($to) {
+				$message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Reviewer Password Changed Successfully');
 			});
 			return back() -> with('success', 'A password reset email has been sent!');
 		} else return back() -> with('danger', 'That email does not exist!');

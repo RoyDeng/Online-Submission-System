@@ -14,6 +14,7 @@ use App\Conference\Reviewer;
 use App\Conference\Review;
 use App\Conference\Invitation;
 use App\Conference\Decision;
+use App\Conference\Chair;
 use App\Conference\FinalDecision;
 use App\Conference\Revision;
 use App\Conference\RevisedManuscript;
@@ -42,44 +43,40 @@ class EditorController extends Controller {
 
     public function SendInvitation(Request $request) {
         $editor = Auth::user();
-        $count = Invitation::where('manuscript_id', $request -> manuscript_id) -> where('reviewer_id', $request -> reviewer_id) -> count();
-        if ($count > 0) return back() -> with('danger', 'You have already sent a invitation to the reviewer!');
+        $deadline = Manuscript::find($request -> manuscript_id) -> topic -> conference -> exist_deadline;
+        if ($deadline < $request -> deadline) return back() -> with('warn', 'The daedline is not valid!');
         else {
-            $deadline = Manuscript::find($request -> manuscript_id) -> topic -> conference -> exist_deadline;
-            if ($deadline < $request -> deadline) return back() -> with('warn', 'The daedline is not valid!');
-            else {
-                $invitation = new Invitation;
-                $invitation -> manuscript_id = $request -> manuscript_id;
-                $invitation -> reviewer_id = $request -> reviewer_id;
-                $invitation -> editor_id = $editor -> id;
-                $invitation -> deadline = $request -> deadline;
-                $invitation -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
-                $invitation -> save();
-                $to = [
-                    'email' => $invitation -> reviewer -> email,
-                    'name' => $invitation -> reviewer -> firstname.' '.$invitation -> reviewer -> middlename.' '.$invitation -> reviewer -> lastname
-                ];
-                $data = [
-                    'reviewer_title' => $invitation -> reviewer -> title,
-                    'reviewer_firstname' => $invitation -> reviewer -> firstname,
-                    'reviewer_middlename' => $invitation -> reviewer -> middlename,
-                    'reviewer_lastname' => $invitation -> reviewer -> lastname,
-                    'manuscript_number' => $invitation -> manuscript -> number,
-                    'manuscript_title' => $invitation -> manuscript -> title,
-                    'conference' => $invitation -> manuscript -> topic -> conference -> title,
-                    'deadline' => $invitation -> deadline,
-                    'number' => $invitation -> manuscript -> topic -> conference -> number,
-                    'editor_title' => $invitation -> editor -> title,
-                    'editor_firstname' => $invitation -> editor -> firstname,
-                    'editor_middlename' => $invitation -> editor -> middlename,
-                    'editor_lastname' => $invitation -> editor -> lastname
-                ];
-                Mail::send('email.send_invitation', $data, function($message) use ($to)
-                {
-                    $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Invitation to Review Manuscript');
-                });
-                return back() -> with('success', 'You have successfully sent a invitation!');
-            }
+            $invitation = new Invitation;
+            $invitation -> manuscript_id = $request -> manuscript_id;
+            $invitation -> reviewer_id = $request -> reviewer_id;
+            $invitation -> editor_id = $editor -> id;
+            $invitation -> deadline = $request -> deadline;
+            $invitation -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
+            $invitation -> save();
+            $to = [
+                'email' => $invitation -> reviewer -> email,
+                'name' => $invitation -> reviewer -> firstname.' '.$invitation -> reviewer -> middlename.' '.$invitation -> reviewer -> lastname
+            ];
+            $data = [
+                'reviewer_title' => $invitation -> reviewer -> title,
+                'reviewer_firstname' => $invitation -> reviewer -> firstname,
+                'reviewer_middlename' => $invitation -> reviewer -> middlename,
+                'reviewer_lastname' => $invitation -> reviewer -> lastname,
+                'manuscript_number' => $invitation -> manuscript -> number,
+                'manuscript_title' => $invitation -> manuscript -> title,
+                'conference' => $invitation -> manuscript -> topic -> conference -> title,
+                'deadline' => $invitation -> deadline,
+                'number' => $invitation -> manuscript -> topic -> conference -> number,
+                'editor_title' => $invitation -> editor -> title,
+                'editor_firstname' => $invitation -> editor -> firstname,
+                'editor_middlename' => $invitation -> editor -> middlename,
+                'editor_lastname' => $invitation -> editor -> lastname
+            ];
+            Mail::send('email.conference.send_invitation', $data, function($message) use ($to)
+            {
+                $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Invitation to Review Manuscript');
+            });
+            return back() -> with('success', 'You have successfully sent an invitation!');
         }
     }
 
@@ -107,39 +104,43 @@ class EditorController extends Controller {
     }
 
     public function MakeDecision(Request $request) {
-        $editor = Auth::user();
-        $decision = new Decision;
-        $decision -> manuscript_id = $request -> manuscript_id;
-        $decision -> editor_id = $editor -> id;
-        $decision -> status = $request -> status;
-        $decision -> comment = $request -> comment;
-        $decision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
-        $decision -> save();
-        $chairs = Chair::where('conference_id', $decision -> manuscript -> topic -> conference -> id) -> get();
-        foreach ($chairs as $chair) {
-            $to = [
-                'email' => $chair -> email,
-                'name' => $chair -> firstname.' '.$chair -> middlename.' '.$chair -> lastname
-            ];
-            $data = [
-                'chair_title' => $chair -> title,
-                'chair_firstname' => $chair -> firstname,
-                'chair_middlename' => $chair -> middlename,
-                'chair_lastname' => $chair -> lastname,
-                'manuscript_number' => $decision -> manuscript -> number,
-                'manuscript_title' => $decision -> manuscript -> title,
-                'conference' => $decision -> manuscript -> topic -> conference -> title,
-                'number' => $decision -> manuscript -> topic -> conference -> number,
-                'editor_title' => $decision -> editor -> title,
-                'editor_firstname' => $decision -> editor -> firstname,
-                'editor_middlename' => $decision -> editor -> middlename,
-                'editor_lastname' => $decision -> editor -> lastname
-            ];
-            Mail::send('email.make_decision', $data, function($message) use ($to) {
-                $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Notification about Receiving Decision');
-            });
+        $count = Decision::where('manuscript_id', $request -> manuscript_id) -> count();
+        if ($count > 0) return back() -> with('danger', 'The decision has already existed!');
+        else {
+            $editor = Auth::user();
+            $decision = new Decision;
+            $decision -> manuscript_id = $request -> manuscript_id;
+            $decision -> editor_id = $editor -> id;
+            $decision -> status = $request -> status;
+            $decision -> comment = $request -> comment;
+            $decision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
+            $decision -> save();
+            $chairs = Chair::where('conference_id', $decision -> manuscript -> topic -> conference -> id) -> get();
+            foreach ($chairs as $chair) {
+                $to = [
+                    'email' => $chair -> email,
+                    'name' => $chair -> firstname.' '.$chair -> middlename.' '.$chair -> lastname
+                ];
+                $data = [
+                    'chair_title' => $chair -> title,
+                    'chair_firstname' => $chair -> firstname,
+                    'chair_middlename' => $chair -> middlename,
+                    'chair_lastname' => $chair -> lastname,
+                    'manuscript_number' => $decision -> manuscript -> number,
+                    'manuscript_title' => $decision -> manuscript -> title,
+                    'conference' => $decision -> manuscript -> topic -> conference -> title,
+                    'number' => $decision -> manuscript -> topic -> conference -> number,
+                    'editor_title' => $decision -> editor -> title,
+                    'editor_firstname' => $decision -> editor -> firstname,
+                    'editor_middlename' => $decision -> editor -> middlename,
+                    'editor_lastname' => $decision -> editor -> lastname
+                ];
+                Mail::send('email.conference.make_decision', $data, function($message) use ($to) {
+                    $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Notification about Receiving Decision');
+                });
+            }
+            return view('conference.editor.upload_success');
         }
-        return view('conference.editor.upload_success');
     }
 
     public function Revisions(Request $request) {
@@ -175,39 +176,43 @@ class EditorController extends Controller {
     }
 
     public function MakeReDecision(Request $request) {
-        $editor = Auth::user();
-        $decision = new ReDecision;
-        $decision -> revised_manuscript_id = $request -> manuscript_id;
-        $decision -> editor_id = $editor -> id;
-        $decision -> status = $request -> status;
-        $decision -> comment = $request -> comment;
-        $decision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
-        $decision -> save();
-        $chairs = Chair::where('conference_id', $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> id) -> get();
-        foreach ($chairs as $chair) {
-            $to = [
-                'email' => $chair -> email,
-                'name' => $chair -> firstname.' '.$chair -> middlename.' '.$chair -> lastname
-            ];
-            $data = [
-                'chair_title' => $chair -> title,
-                'chair_firstname' => $chair -> firstname,
-                'chair_middlename' => $chair -> middlename,
-                'chair_lastname' => $chair -> lastname,
-                'manuscript_number' => $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> number,
-                'manuscript_title' => $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> title,
-                'conference' => $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> title,
-                'number' => $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> number,
-                'editor_title' => $decision -> editor -> title,
-                'editor_firstname' => $decision -> editor -> firstname,
-                'editor_middlename' => $decision -> editor -> middlename,
-                'editor_lastname' => $decision -> editor -> lastname
-            ];
-            Mail::send('email.make_revision_decision', $data, function($message) use ($to) {
-                $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Notification about Receiving Revision Decision');
-            });
+        $count = ReDecision::where('revised_manuscript_id', $request -> manuscript_id) -> count();
+        if ($count > 0) return back() -> with('danger', 'The revision decision has already existed!');
+        else {
+            $editor = Auth::user();
+            $decision = new ReDecision;
+            $decision -> revised_manuscript_id = $request -> manuscript_id;
+            $decision -> editor_id = $editor -> id;
+            $decision -> status = $request -> status;
+            $decision -> comment = $request -> comment;
+            $decision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
+            $decision -> save();
+            $chairs = Chair::where('conference_id', $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> id) -> get();
+            foreach ($chairs as $chair) {
+                $to = [
+                    'email' => $chair -> email,
+                    'name' => $chair -> firstname.' '.$chair -> middlename.' '.$chair -> lastname
+                ];
+                $data = [
+                    'chair_title' => $chair -> title,
+                    'chair_firstname' => $chair -> firstname,
+                    'chair_middlename' => $chair -> middlename,
+                    'chair_lastname' => $chair -> lastname,
+                    'manuscript_number' => $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> number,
+                    'manuscript_title' => $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> title,
+                    'conference' => $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> title,
+                    'number' => $decision -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> number,
+                    'editor_title' => $decision -> editor -> title,
+                    'editor_firstname' => $decision -> editor -> firstname,
+                    'editor_middlename' => $decision -> editor -> middlename,
+                    'editor_lastname' => $decision -> editor -> lastname
+                ];
+                Mail::send('email.conference.make_revision_decision', $data, function($message) use ($to) {
+                    $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Notification about Receiving Revision Decision');
+                });
+            }
+            return view('conference.editor.upload_success');
         }
-        return view('conference.editor.upload_success');
     }
 
     public function SendReReInvitationPage(Request $request) {
@@ -222,44 +227,40 @@ class EditorController extends Controller {
 
     public function SendReInvitation(Request $request) {
         $editor = Auth::user();
-        $count = ReInvitation::where('revised_manuscript_id', $request -> revised_manuscript_id) -> where('reviewer_id', $request -> reviewer_id) -> count();
-        if ($count > 0) return back() -> with('danger', 'You have already sent a invitation to the reviewer!');
+        $deadline = RevisedManuscript::find($request -> revised_manuscript_id) -> revision -> final_decision -> manuscript -> topic -> conference -> exist_deadline;
+        if ($deadline < $request -> deadline) return back() -> with('warn', 'The daedline is not valid!');
         else {
-            $deadline = RevisedManuscript::find($request -> revised_manuscript_id) -> revision -> final_decision -> manuscript -> topic -> conference -> exist_deadline;
-            if ($deadline < $request -> deadline) return back() -> with('warn', 'The daedline is not valid!');
-            else {
-                $invitation = new ReInvitation;
-                $invitation -> revised_manuscript_id = $request -> revised_manuscript_id;
-                $invitation -> reviewer_id = $request -> reviewer_id;
-                $invitation -> editor_id = $editor -> id;
-                $invitation -> deadline = $request -> deadline;
-                $invitation -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
-                $invitation -> save();
-                $to = [
-                    'email' => $invitation -> reviewer -> email,
-                    'name' => $invitation -> reviewer -> firstname.' '.$invitation -> reviewer -> middlename.' '.$invitation -> reviewer -> lastname
-                ];
-                $data = [
-                    'reviewer_title' => $invitation -> reviewer -> title,
-                    'reviewer_firstname' => $invitation -> reviewer -> firstname,
-                    'reviewer_middlename' => $invitation -> reviewer -> middlename,
-                    'reviewer_lastname' => $invitation -> reviewer -> lastname,
-                    'manuscript_number' => $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> number,
-                    'manuscript_title' => $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> title,
-                    'conference' => $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> title,
-                    'deadline' => $invitation -> deadline,
-                    'number' => $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> number,
-                    'editor_title' => $invitation -> editor -> title,
-                    'editor_firstname' => $invitation -> editor -> firstname,
-                    'editor_middlename' => $invitation -> editor -> middlename,
-                    'editor_lastname' => $invitation -> editor -> lastname
-                ];
-                Mail::send('email.send_revision_invitation', $data, function($message) use ($to)
-                {
-                    $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Invitation to Review Manuscript');
-                });
-                return back() -> with('success', 'You have successfully sent a invitation!');
-            }
+            $invitation = new ReInvitation;
+            $invitation -> revised_manuscript_id = $request -> revised_manuscript_id;
+            $invitation -> reviewer_id = $request -> reviewer_id;
+            $invitation -> editor_id = $editor -> id;
+            $invitation -> deadline = $request -> deadline;
+            $invitation -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
+            $invitation -> save();
+            $to = [
+                'email' => $invitation -> reviewer -> email,
+                'name' => $invitation -> reviewer -> firstname.' '.$invitation -> reviewer -> middlename.' '.$invitation -> reviewer -> lastname
+            ];
+            $data = [
+                'reviewer_title' => $invitation -> reviewer -> title,
+                'reviewer_firstname' => $invitation -> reviewer -> firstname,
+                'reviewer_middlename' => $invitation -> reviewer -> middlename,
+                'reviewer_lastname' => $invitation -> reviewer -> lastname,
+                'manuscript_number' => $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> number,
+                'manuscript_title' => $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> title,
+                'conference' => $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> title,
+                'deadline' => $invitation -> deadline,
+                'number' => $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> topic -> conference -> number,
+                'editor_title' => $invitation -> editor -> title,
+                'editor_firstname' => $invitation -> editor -> firstname,
+                'editor_middlename' => $invitation -> editor -> middlename,
+                'editor_lastname' => $invitation -> editor -> lastname
+            ];
+            Mail::send('email.conference.send_revision_invitation', $data, function($message) use ($to)
+            {
+                $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Invitation to Review Manuscript');
+            });
+            return back() -> with('success', 'You have successfully sent an invitation!');
         }
     }
 
@@ -300,8 +301,8 @@ class EditorController extends Controller {
                 'conference' => $reviewer -> conference -> title,
                 'number' => $reviewer -> conference -> number
             ];
-            Mail::send('email.create_reviewer', $data, function($message) use ($to) {
-                $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Reviewer Registration Successful');
+            Mail::send('email.conference.create_reviewer', $data, function($message) use ($to) {
+                $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Reviewer Registration Successful');
             });
             return back() -> with('success', 'You have successfully created a editor!');
         }
@@ -333,26 +334,26 @@ class EditorController extends Controller {
     }
 
     public function EditProfile(Request $request) {
-        $chair = Auth::user();
-        $chair -> title = $request -> title;
-        $chair -> firstname = $request -> firstname;
-        $chair -> middlename = $request -> middlename;
-        $chair -> lastname = $request -> lastname;
-        $chair -> tel = $request -> tel;
-        $chair -> institution = $request -> institution;
-        $chair -> country = $request -> country;
-        $chair -> modified_time = Carbon::now() -> format('Y-m-d H:i:s');
-        $chair -> save();
+        $editor = Auth::user();
+        $editor -> title = $request -> title;
+        $editor -> firstname = $request -> firstname;
+        $editor -> middlename = $request -> middlename;
+        $editor -> lastname = $request -> lastname;
+        $editor -> tel = $request -> tel;
+        $editor -> institution = $request -> institution;
+        $editor -> country = $request -> country;
+        $editor -> modified_time = Carbon::now() -> format('Y-m-d H:i:s');
+        $editor -> save();
         return back() -> with('success', 'You have successfully updated your profile!');
     }
 
     public function ChangePassword(Request $request) {
-        $chair = Auth::user();
+        $editor = Auth::user();
         if ($request -> confirm_password == $request -> new_password) {
-            if (!Hash::check($request -> current_password, $chair -> password)) return back() -> with('danger', 'Your current password is incorrect!');
+            if (!Hash::check($request -> current_password, $editor -> password)) return back() -> with('danger', 'Your current password is incorrect!');
             else {
-                $chair -> password =  bcrypt($request -> new_password);
-                $chair -> save();
+                $editor -> password =  bcrypt($request -> new_password);
+                $editor -> save();
                 return back() -> with('success', 'You have successfully changed your password!');
             }
         } else return back() -> with('warn', 'Your password and confirm password do not match!');

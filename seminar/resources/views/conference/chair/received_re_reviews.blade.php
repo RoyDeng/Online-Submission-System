@@ -22,7 +22,7 @@
 			</li>
 		</ol>
 	</div>
-    @if ($revision -> revised_manuscript -> revision -> status == 0)
+    @if ($revision -> revised_manuscript -> re_decision != '')
         <div class="col-sm-8">
             <div class="title-action">
                 <button type="button" class="btn btn-primary" data-target="#MakeDecision" data-toggle="modal" onclick="GetDecision('{{ $revision -> revised_manuscript -> revision -> final_decision -> id }}')">Make a Final Decision</button>
@@ -44,7 +44,7 @@
                                 <tr>
                                     <th>Author</th>
                                     <td>
-                                        <h4>{{ $revision -> final_decision -> manuscript -> author -> title }}{{ $revision -> final_decision -> manuscript -> author -> firstname }} {{ $revision -> final_decision -> manuscript -> author -> middlename }} {{ $revision -> final_decision -> manuscript -> author -> lastname }}</h4>
+                                        <h4>{{ $revision -> final_decision -> manuscript -> author -> title }} {{ $revision -> final_decision -> manuscript -> author -> firstname }} {{ $revision -> final_decision -> manuscript -> author -> middlename }} {{ $revision -> final_decision -> manuscript -> author -> lastname }}</h4>
                                         <p>
                                             <i class="fa fa-university"></i> {{ $revision -> final_decision -> manuscript -> author -> institution }}
                                         </p>
@@ -61,11 +61,21 @@
                                 </tr>
                                 <tr>
                                     <th>Number</th>
-                                    <td>{{$revision -> final_decision -> manuscript -> number}}</td>
+                                    <td>{{$revision -> revised_manuscript -> number}}</td>
                                 </tr>
                                 <tr>
                                     <th>Submission Type</th>
                                     <td>{{$revision -> final_decision -> manuscript -> submission_type -> name}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Presentation Type</th>
+                                    <td>
+                                        @if ($revision -> final_decision -> manuscript -> type == 0)
+											Oral
+										@else
+                                            Poster
+										@endif
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th>Title</th>
@@ -80,7 +90,7 @@
                                     <td>
                                         <ul class="list-unstyled file-list">
                                             @foreach ($revision -> revised_manuscript -> revised_file as $file)
-                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}.{{$file -> type}}</a></li>
+                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}</a></li>
                                             @endforeach
                                         </ul>
                                     </td>
@@ -302,7 +312,7 @@
                         </tr>
                         <tr>
                             <th>File</th>
-                            <td><a id="review_file_url" download><span id="review_file_name"></span>.<span id="review_file_type"></span></a></td>
+                            <td><a id="review_file_url" download><span id="review_file_name"></span></a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -335,7 +345,6 @@
                 $('#review_comment_author').text(result.comment_author);
                 $('#review_comment_editor').text(result.comment_editor);
                 $('#review_file_name').text(result.re_review_file.name);
-                $('#review_file_type').text(result.re_review_file.type);
                 $('#review_file_url').attr('href', '/upload/' + result.re_review_file.url);
             }
         });

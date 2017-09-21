@@ -37,7 +37,7 @@
                                 <tr>
                                     <th>Author</th>
                                     <td>
-                                        <h4>{{ $revision -> final_decision -> manuscript -> author -> title }}{{ $revision -> final_decision -> manuscript -> author -> firstname }} {{ $revision -> final_decision -> manuscript -> author -> middlename }} {{ $revision -> final_decision -> manuscript -> author -> lastname }}</h4>
+                                        <h4>{{ $revision -> final_decision -> manuscript -> author -> title }} {{ $revision -> final_decision -> manuscript -> author -> firstname }} {{ $revision -> final_decision -> manuscript -> author -> middlename }} {{ $revision -> final_decision -> manuscript -> author -> lastname }}</h4>
                                         <p>
                                             <i class="fa fa-university"></i> {{ $revision -> final_decision -> manuscript -> author -> institution }}
                                         </p>
@@ -54,7 +54,7 @@
                                 </tr>
                                 <tr>
                                     <th>Number</th>
-                                    <td>{{$revision -> final_decision -> manuscript -> number}}</td>
+                                    <td>{{$revision -> revised_manuscript -> number}}</td>
                                 </tr>
                                 <tr>
                                     <th>Submission Type</th>
@@ -73,7 +73,7 @@
                                     <td>
                                         <ul class="list-unstyled file-list">
                                             @foreach ($revision -> revised_manuscript -> revised_file as $file)
-                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}.{{$file -> type}}</a></li>
+                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}</a></li>
                                             @endforeach
                                         </ul>
                                     </td>
@@ -91,25 +91,34 @@
                 </div>
                 <div>
                     <div class="ibox-content">
-                        @if ($revision -> revised_manuscript -> re_invitation != '')
+                        @if ($revision -> revised_manuscript -> re_invitation != '[]')
                             <div style="max-height: 250px; overflow-y:scroll;">
                                 <ul class="list-group elements-list">
-                                    @foreach ($revision -> revised_manuscript -> re_invitation as $invation)
+                                    @foreach ($revision -> revised_manuscript -> re_invitation as $invitation)
                                         <li class="list-group-item">
-                                            <small class="pull-right text-muted"> {{$invation -> added_time}}</small>
-                                            <strong>{{ $invation -> reviewer -> title }}{{ $invation -> reviewer -> firstname }} {{ $invation -> reviewer -> middlename }} {{ $invation -> reviewer -> lastname }}</strong>
+                                            <small class="pull-right text-muted"> {{$invitation -> added_time}}</small>
+                                            <strong>{{ $invitation -> reviewer -> title }} {{ $invitation -> reviewer -> firstname }} {{ $invitation -> reviewer -> middlename }} {{ $invitation -> reviewer -> lastname }}</strong>
                                             <div class="small m-t-xs">
                                                 <p>
-                                                    <i class="fa fa-university"></i> {{ $invation -> reviewer -> institution }}
+                                                    <i class="fa fa-university"></i> {{ $invitation -> reviewer -> institution }}
                                                 </p>
                                                 <p>
-                                                    <i class="fa fa-globe"></i> {{ $invation -> reviewer -> country }}
+                                                    <i class="fa fa-globe"></i> {{ $invitation -> reviewer -> country }}
                                                 </p>
                                                 <p>
-                                                    <i class="fa fa-phone"></i> {{ $invation -> reviewer -> tel }}
+                                                    <i class="fa fa-phone"></i> {{ $invitation -> reviewer -> tel }}
                                                 </p>
                                                 <p>
-                                                    <i class="fa fa-envelope"></i> {{ $invation -> reviewer -> email }}
+                                                    <i class="fa fa-envelope"></i> {{ $invitation -> reviewer -> email }}
+                                                </p>
+                                                <p>
+                                                    @if ($invitation -> status == 0)
+                                                        <span class="label label-warning">Pending</span>
+                                                    @elseif ($invitation -> status == 1)
+                                                        <span class="label label-success">Accepted</span>
+                                                    @else
+                                                        <span class="label label-danger">Rejected</span>
+                                                    @endif
                                                 </p>
                                             </div>
                                         </li>
@@ -158,54 +167,63 @@
 	@endif
 	<div class="row">
         <div class="col-lg-12">
-            <div class="table-responsive">
-				<table class="table table-striped table-bordered table-hover dataTables-example">
-					<thead>
-						<tr>
-							<th>No.</th>
-							<th>Information</th>
-							<th>Status</th>
-							<th>Actions</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach ($reviewers as $r => $reviewer)
-							<tr>
-								<td>{{ $r + 1 }}</td>
-								<td>
-									<h4>{{ $reviewer -> title }}{{ $reviewer -> firstname }} {{ $reviewer -> middlename }} {{ $reviewer -> lastname }}</h4>
-									<p>
-										<i class="fa fa-university"></i> {{ $reviewer -> institution }}
-									</p>
-									<p>
-										<i class="fa fa-globe"></i> {{ $reviewer -> country }}
-									</p>
-									<p>
-										<i class="fa fa-phone"></i> {{ $reviewer -> tel }}
-									</p>
-									<p>
-										<i class="fa fa-envelope"></i> {{ $reviewer -> email }}
-									</p>
-								</td>
-								<td>
-                                    <p>
-                                        <b>Pending:</b> {{ count($reviewer -> invitation -> where('status', 0)) + count($reviewer -> re_invitation -> where('status', 0)) }}
-									</p>
-                                    <p>
-                                        <b>Accepted:</b> {{ count($reviewer -> invitation -> where('status', 1)) + count($reviewer -> re_invitation -> where('status', 1)) }}
-									</p>
-                                    <p>
-                                        <b>Rejected:</b> {{ count($reviewer -> invitation -> where('status', 2)) + count($reviewer -> re_invitation -> where('status', 2)) }}
-									</p>
-								</td>
-								<td>
-                                    <button type="button" class="btn btn-success" data-target="#ConfirmReviewer" data-toggle="modal" onclick="GetReviewer('{{ $reviewer -> id }}')"><i class="fa fa-check"></i></button>
-								</td>
-							</tr>
-						@endforeach
-					</tbody>
-				</table>
-			</div>
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Select one or more reviewers from the dialog box.</h5>
+                </div>
+                <div>
+                    <div class="ibox-content">
+                        <div class="table-responsive">
+                            <table class="table table-striped table-bordered table-hover dataTables-example">
+                                <thead>
+                                    <tr>
+                                        <th>No.</th>
+                                        <th>Information</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($reviewers as $r => $reviewer)
+                                        <tr>
+                                            <td>{{ $r + 1 }}</td>
+                                            <td>
+                                                <h4>{{ $reviewer -> title }} {{ $reviewer -> firstname }} {{ $reviewer -> middlename }} {{ $reviewer -> lastname }}</h4>
+                                                <p>
+                                                    <i class="fa fa-university"></i> {{ $reviewer -> institution }}
+                                                </p>
+                                                <p>
+                                                    <i class="fa fa-globe"></i> {{ $reviewer -> country }}
+                                                </p>
+                                                <p>
+                                                    <i class="fa fa-phone"></i> {{ $reviewer -> tel }}
+                                                </p>
+                                                <p>
+                                                    <i class="fa fa-envelope"></i> {{ $reviewer -> email }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <p>
+                                                    <b>Pending:</b> {{ count($reviewer -> invitation -> where('status', 0)) + count($reviewer -> re_invitation -> where('status', 0)) }}
+                                                </p>
+                                                <p>
+                                                    <b>Accepted:</b> {{ count($reviewer -> invitation -> where('status', 1)) + count($reviewer -> re_invitation -> where('status', 1)) }}
+                                                </p>
+                                                <p>
+                                                    <b>Rejected:</b> {{ count($reviewer -> invitation -> where('status', 2)) + count($reviewer -> re_invitation -> where('status', 2)) }}
+                                                </p>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-success" data-target="#ConfirmReviewer" data-toggle="modal" onclick="GetReviewer('{{ $reviewer -> id }}')"><i class="fa fa-check"></i></button>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
 		</div>
 	</div>
 	<div class="footer">

@@ -41,6 +41,16 @@
 			</div>
 		</div>
 	@endif
+    @if ($msg = Session::get('danger'))
+		<div class="row">
+			<div class="col-lg-12">
+				<div class="alert alert-danger alert-dismissible fade in">
+					<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+					<strong>{{ $msg }}</strong>
+				</div>
+			</div>
+		</div>
+	@endif
     <div class="row">
         <div class="col-md-8">
             <div class="ibox float-e-margins">
@@ -54,7 +64,7 @@
                                 <tr>
                                     <th>Author</th>
                                     <td>
-                                        <h4>{{ $manuscript -> author -> title }}{{ $manuscript -> author -> firstname }} {{ $manuscript -> author -> middlename }} {{ $manuscript -> author -> lastname }}</h4>
+                                        <h4>{{ $manuscript -> author -> title }} {{ $manuscript -> author -> firstname }} {{ $manuscript -> author -> middlename }} {{ $manuscript -> author -> lastname }}</h4>
                                         <p>
                                             <i class="fa fa-university"></i> {{ $manuscript -> author -> institution }}
                                         </p>
@@ -78,6 +88,16 @@
                                     <td>{{$manuscript -> submission_type -> name}}</td>
                                 </tr>
                                 <tr>
+                                    <th>Presentation Type</th>
+                                    <td>
+                                        @if ($manuscript -> type == 0)
+											Oral
+										@else
+                                            Poster
+										@endif
+                                    </td>
+                                </tr>
+                                <tr>
                                     <th>Title</th>
                                     <td>{{$manuscript -> title}}</td>
                                 </tr>
@@ -90,7 +110,7 @@
                                     <td>
                                         <ul class="list-unstyled file-list">
                                             @foreach ($manuscript -> file as $file)
-                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}.{{$file -> type}}</a></li>
+                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}</a></li>
                                             @endforeach
                                         </ul>
                                     </td>
@@ -264,7 +284,7 @@
                         </tr>
                         <tr>
                             <th>File</th>
-                            <td><a id="review_file_url" href="/upload/{{$file -> url}}" download><span id="review_file_name"></span>.<span id="review_file_type"></span></a></td>
+                            <td><a id="review_file_url" href="/upload/{{$file -> url}}" download><span id="review_file_name"></span></a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -285,7 +305,6 @@
 				$('#review_comment_author').text(result.comment_author);
 				$('#review_comment_editor').text(result.comment_editor);
 				$('#review_file_name').text(result.review_file.name);
-				$('#review_file_type').text(result.review_file.type);
                 $('#review_file_url').attr('href', '/upload/' + result.review_file.url);
 			}
 		});

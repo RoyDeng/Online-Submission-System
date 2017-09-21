@@ -43,7 +43,7 @@
 					<input type="text" class="form-control" name="lastname" placeholder="Last Mame" required>
 				</div>
 				<div class="form-group">
-					<input type="text" class="form-control" name="tel" placeholder="Telephone" required>
+					<input type="text" class="form-control" name="tel" placeholder="Telephone">
 				</div>
 				<div class="form-group">
 					<input type="text" class="form-control" name="institution" placeholder="Institution" required>

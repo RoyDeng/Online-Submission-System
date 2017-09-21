@@ -37,7 +37,7 @@
                                 <tr>
                                     <th>Author</th>
                                     <td>
-                                        <h4>{{ $manuscript -> author -> title }}{{ $manuscript -> author -> firstname }} {{ $manuscript -> author -> middlename }} {{ $manuscript -> author -> lastname }}</h4>
+                                        <h4>{{ $manuscript -> author -> title }} {{ $manuscript -> author -> firstname }} {{ $manuscript -> author -> middlename }} {{ $manuscript -> author -> lastname }}</h4>
                                         <p>
                                             <i class="fa fa-university"></i> {{ $manuscript -> author -> institution }}
                                         </p>
@@ -73,7 +73,7 @@
                                     <td>
                                         <ul class="list-unstyled file-list">
                                             @foreach ($manuscript -> file as $file)
-                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}.{{$file -> type}}</a></li>
+                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}</a></li>
                                             @endforeach
                                         </ul>
                                     </td>
@@ -96,7 +96,7 @@
                                 <tr>
                                     <th>Chair</th>
                                     <td>
-                                        <h4>{{ $manuscript -> final_decision -> chair -> title }}{{ $manuscript -> final_decision -> chair -> firstname }} {{ $manuscript -> final_decision -> chair -> middlename }} {{ $manuscript -> final_decision -> chair -> lastname }}</h4>
+                                        <h4>{{ $manuscript -> final_decision -> chair -> title }} {{ $manuscript -> final_decision -> chair -> firstname }} {{ $manuscript -> final_decision -> chair -> middlename }} {{ $manuscript -> final_decision -> chair -> lastname }}</h4>
                                         <p>
                                             <i class="fa fa-university"></i> {{ $manuscript -> final_decision -> chair -> institution }}
                                         </p>

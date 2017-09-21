@@ -104,9 +104,9 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="form-label" for="abbr">Abbreviation</label>
+						<label class="form-label" for="number">ID (Abbreviation)</label>
 						<div class="controls">
-							<input class="form-control" id="abbr" name="abbr" required>
+							<input class="form-control" id="number" name="number" required>
 						</div>
 					</div>
 					<div class="form-group">
@@ -135,9 +135,21 @@
 				<form action="{{ url('admin/edit_conference') }}" method="post">
 					{{ csrf_field() }}
 					<div class="form-group">
+						<label class="form-label" for="edit_conference_title">Title</label>
+						<div class="controls">
+							<input class="form-control" id="edit_conference_title" name="title" required>
+						</div>
+					</div>
+					<div class="form-group">
+						<label class="form-label" for="edit_conference_number">ID (Abbreviation)</label>
+						<div class="controls">
+							<input class="form-control" id="edit_conference_number" name="number" required>
+						</div>
+					</div>
+					<div class="form-group">
 						<label class="form-label" for="edit_conference_deadline">Deadline</label>
 						<div class="controls">
-							<input class="form-control deadline" id="edit_conference_deadline" name="deadline" data-mask="9999-99-99" required>
+							<input class="form-control deadline" id="edit_conference_deadline" name="deadline" required>
 						</div>
 					</div>
 					<input type="hidden" id="edit_conference_id" name="id">
@@ -202,6 +214,8 @@
 			data: {'id':id},
 			success: function(result) {
 				$('#edit_conference_id').val(result.id);
+				$('#edit_conference_number').val(result.number);
+				$('#edit_conference_title').val(result.title);
 				$('#edit_conference_deadline').val(result.exist_deadline);
 				$('#close_conference_id').val(result.id);
 				$('#open_conference_id').val(result.id);

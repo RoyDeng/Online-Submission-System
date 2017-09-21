@@ -65,7 +65,7 @@
 							<tr>
 								<td>{{ $e + 1 }}</td>
 								<td>
-									<h4>{{ $editor -> title }}{{ $editor -> firstname }} {{ $editor -> middlename }} {{ $editor -> lastname }}</h4>
+									<h4>{{ $editor -> title }} {{ $editor -> firstname }} {{ $editor -> middlename }} {{ $editor -> lastname }}</h4>
 									<p>
 										<i class="fa fa-university"></i> {{ $editor -> institution }}
 									</p>
@@ -83,7 +83,7 @@
 									@if ($editor -> status == 1)
 										<span class="label label-success">Enabled</span>
 									@else
-										<span class="label label-danger">Suspened</span>
+										<span class="label label-danger">Suspended</span>
 									@endif
 								</td>
 								<td>{{ $editor -> added_time }}</td>
@@ -197,7 +197,7 @@
 			</div>
 			<div class="modal-body">
 				<i class="fa fa-question-circle fa-lg"></i>  
-				Do you want to suspend the chair?
+				Do you want to suspend the editor?
 				<form action="{{ url('conference/chair/suspend_editor') }}" method="post">
 					{{ csrf_field() }}
 					<input type="hidden" id="suspend_editor_id" name="id">
@@ -219,7 +219,7 @@
 			</div>
 			<div class="modal-body">
 				<i class="fa fa-question-circle fa-lg"></i>  
-				Do you want to resume the chair?
+				Do you want to resume the editor?
 				<form action="{{ url('conference/chair/resume_editor') }}" method="post">
 					{{ csrf_field() }}
 					<input type="hidden" id="resume_editor_id" name="id">

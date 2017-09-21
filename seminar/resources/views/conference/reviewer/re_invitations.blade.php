@@ -35,6 +35,8 @@
 					<thead>
 						<tr>
 							<th>No.</th>
+							<th>Submission Type</th>
+							<th>ID</th>
                             <th>Title</th>
 							<th>Author</th>
 							<th>Deadline</th>
@@ -47,9 +49,11 @@
                         @foreach ($re_invitations as $i => $invitation)
 							<tr>
 								<td>{{ $i + 1 }}</td>
+								<td>{{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> submission_type -> name }}</td>
+								<td>{{ $invitation -> revised_manuscript -> number }}</td>
                                 <td>{{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> title }}</td>
 								<td>
-									<h4>{{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> title }}{{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> firstname }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> middlename }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> lastname }}</h4>
+									<h4>{{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> title }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> firstname }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> middlename }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> lastname }}</h4>
 									<p>
 										<i class="fa fa-university"></i> {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> institution }}
 									</p>
@@ -176,7 +180,7 @@
                         </tr>
                         <tr>
                             <th>File</th>
-                            <td><a id="review_file_url" download><span id="review_file_name"></span>.<span id="review_file_type"></span></a></td>
+                            <td><a id="review_file_url" download><span id="review_file_name"></span></a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -209,7 +213,6 @@
 				$('#review_comment_author').text(result.comment_author);
 				$('#review_comment_editor').text(result.comment_editor);
 				$('#review_file_name').text(result.re_review_file.name);
-				$('#review_file_type').text(result.re_review_file.type);
                 $('#review_file_url').attr('href', '/upload/' + result.re_review_file.url);
 			}
 		});

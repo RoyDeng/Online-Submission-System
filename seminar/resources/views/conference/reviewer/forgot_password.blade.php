@@ -21,7 +21,7 @@
                                 <div class="form-group">
                                     <input type="email" class="form-control" placeholder="Email" name="email" required>
                                 </div>
-                                <input type="hidden" name="conference_id" vlaue="{{$conference -> id}}">
+                                <input type="hidden" name="conference_id" value="{{$conference -> id}}">
                                 <button type="submit" class="btn btn-primary block full-width m-b">Send</button>
                             </form>
                         </div>

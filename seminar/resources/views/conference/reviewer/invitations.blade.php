@@ -35,6 +35,8 @@
 					<thead>
 						<tr>
 							<th>No.</th>
+							<th>Submission Type</th>
+							<th>ID</th>
                             <th>Title</th>
 							<th>Author</th>
 							<th>Deadline</th>
@@ -47,9 +49,11 @@
                         @foreach ($invitations as $i => $invitation)
 							<tr>
 								<td>{{ $i + 1 }}</td>
+								<td>{{ $invitation -> manuscript -> submission_type -> name }}</td>
+								<td>{{ $invitation -> manuscript -> number }}</td>
                                 <td>{{ $invitation -> manuscript -> title }}</td>
 								<td>
-									<h4>{{ $invitation -> manuscript -> author -> title }}{{ $invitation -> manuscript -> author -> firstname }} {{ $invitation -> manuscript -> author -> middlename }} {{ $invitation -> manuscript -> author -> lastname }}</h4>
+									<h4>{{ $invitation -> manuscript -> author -> title }} {{ $invitation -> manuscript -> author -> firstname }} {{ $invitation -> manuscript -> author -> middlename }} {{ $invitation -> manuscript -> author -> lastname }}</h4>
 									<p>
 										<i class="fa fa-university"></i> {{ $invitation -> manuscript -> author -> institution }}
 									</p>
@@ -176,7 +180,7 @@
                         </tr>
                         <tr>
                             <th>File</th>
-                            <td><a id="review_file_url" download><span id="review_file_name"></span>.<span id="review_file_type"></span></a></td>
+                            <td><a id="review_file_url" download><span id="review_file_name"></span></a></td>
                         </tr>
                     </tbody>
                 </table>
@@ -209,7 +213,6 @@
 				$('#review_comment_author').text(result.comment_author);
 				$('#review_comment_editor').text(result.comment_editor);
 				$('#review_file_name').text(result.review_file.name);
-				$('#review_file_type').text(result.review_file.type);
                 $('#review_file_url').attr('href', '/upload/' + result.review_file.url);
 			}
 		});

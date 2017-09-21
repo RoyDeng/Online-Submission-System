@@ -71,7 +71,8 @@ class ChairController extends Controller {
         $topic = new Topic;
         $topic -> conference_id = $conference -> id;
         $topic -> title = $request -> title;
-        $topic -> number = $conference -> number.'-'.str_random(5);
+        $count = $conference -> topic -> count() + 1;
+        $topic -> number = $conference -> number.'-'.$count;
         $topic -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
         $topic -> save();
         return back() -> with('success', 'You have successfully created a topic!');
@@ -146,8 +147,8 @@ class ChairController extends Controller {
                 'topic' => $editor -> topic -> title,
                 'number' => $editor -> topic -> number
             ];
-            Mail::send('email.create_editor', $data, function($message) use ($to) {
-                $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Editor Registration Successful');
+            Mail::send('email.conference.create_editor', $data, function($message) use ($to) {
+                $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Editor Registration Successful');
             });
             return back() -> with('success', 'You have successfully created a editor!');
         }
@@ -164,14 +165,14 @@ class ChairController extends Controller {
         $editor = Editor::find($request -> id);
         $editor -> status = 0;
         $editor -> save();
-        return back() -> with('success', 'You have successfully suspended the chair!');
+        return back() -> with('success', 'You have successfully suspended the editor!');
     }
 
     public function ResumeEditor(Request $request) {
         $editor = Editor::find($request -> id);
         $editor -> status = 1;
         $editor -> save();
-        return back() -> with('success', 'You have successfully resumed the chair');
+        return back() -> with('success', 'You have successfully resumed the editor!');
     }
 
     public function Manuscripts() {
@@ -200,61 +201,67 @@ class ChairController extends Controller {
     }
 
     public function MakeDecision(Request $request) {
-        $chair = Auth::user();
-        $decision = new FinalDecision;
-        $decision -> manuscript_id = $request -> manuscript_id;
-        $decision -> chair_id = $chair -> id;
-        $decision -> status = $request -> status;
-        $decision -> comment = $request -> comment;
-        $decision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
-        $decision -> save();
-        //針對搞件審閱情形寄送電子郵件，狀態為1表示通過，為0表示退件，其他表示需要修訂
-        if ($request -> status == 1) {
-            $to = [
-                'email' => $decision -> manuscript -> author -> email,
-                'name' => $decision -> manuscript -> author -> firstname.' '.$decision -> manuscript -> author -> middlename.' '.$decision -> manuscript -> author -> lastname
-            ];
-            $data = [
-                'author_title' => $decision -> manuscript -> author -> title,
-                'author_firstname' => $decision -> manuscript -> author -> firstname,
-                'author_middlename' => $decision -> manuscript -> author -> middlename,
-                'author_lastname' => $decision -> manuscript -> author -> lastname,
-                'manuscript_number' => $decision -> manuscript -> number,
-                'manuscript_title' => $decision -> manuscript -> title,
-                'conference' => $decision -> manuscript -> topic -> conference -> title,
-                'chair_title' => $decision -> chair -> title,
-                'chair_firstname' => $decision -> chair -> firstname,
-                'chair_middlename' => $decision -> chair -> middlename,
-                'chair_lastname' => $decision -> chair -> lastname
-            ];
-            Mail::send('email.pass_manuscript', $data, function($message) use ($to) {
-                $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Notification about Passing Manuscript');
-            });
-        } else if ($request -> status == 0) {
-            $to = [
-                'email' => $decision -> manuscript -> author -> email,
-                'name' => $decision -> manuscript -> author -> firstname.' '.$decision -> manuscript -> author -> middlename.' '.$decision -> manuscript -> author -> lastname
-            ];
-            $data = [
-                'author_title' => $decision -> manuscript -> author -> title,
-                'author_firstname' => $decision -> manuscript -> author -> firstname,
-                'author_middlename' => $decision -> manuscript -> author -> middlename,
-                'author_lastname' => $decision -> manuscript -> author -> lastname,
-                'manuscript_number' => $decision -> manuscript -> number,
-                'manuscript_title' => $decision -> manuscript -> title,
-                'conference' => $decision -> manuscript -> topic -> conference -> title,
-                'chair_title' => $decision -> chair -> title,
-                'chair_firstname' => $decision -> chair -> firstname,
-                'chair_middlename' => $decision -> chair -> middlename,
-                'chair_lastname' => $decision -> chair -> lastname
-            ];
-            Mail::send('email.reject_manuscript', $data, function($message) use ($to) {
-                $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Notification about Rejecting Manuscript');
-            });
-        } else {
-            $deadline = FinalDecision::find($decision -> id) -> manuscript -> topic -> conference -> exist_deadline;
+        $count = FinalDecision::where('manuscript_id', $request -> manuscript_id) -> count();
+        if ($count > 0) return back() -> with('danger', 'The decision has already existed!');
+        else {
+            $chair = Auth::user();
+            $deadline = Manuscript::find($request -> manuscript_id) -> topic -> conference -> exist_deadline;
             if ($deadline < $request -> deadline) return back() -> with('warn', 'The daedline is not valid!');
             else {
+                $decision = new FinalDecision;
+                $decision -> manuscript_id = $request -> manuscript_id;
+                $decision -> chair_id = $chair -> id;
+                $decision -> status = $request -> status;
+                $decision -> comment = $request -> comment;
+                $decision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
+                $decision -> save();
+            }
+            //針對搞件審閱情形寄送電子郵件，狀態為1表示通過，為0表示退件，其他表示需要修訂
+            if ($request -> status == 1) {
+                $to = [
+                    'email' => $decision -> manuscript -> author -> email,
+                    'name' => $decision -> manuscript -> author -> firstname.' '.$decision -> manuscript -> author -> middlename.' '.$decision -> manuscript -> author -> lastname
+                ];
+                $data = [
+                    'author_title' => $decision -> manuscript -> author -> title,
+                    'author_firstname' => $decision -> manuscript -> author -> firstname,
+                    'author_middlename' => $decision -> manuscript -> author -> middlename,
+                    'author_lastname' => $decision -> manuscript -> author -> lastname,
+                    'manuscript_number' => $decision -> manuscript -> number,
+                    'manuscript_title' => $decision -> manuscript -> title,
+                    'conference' => $decision -> manuscript -> topic -> conference -> title,
+                    'number' => $decision -> manuscript -> topic -> conference -> number,
+                    'chair_title' => $decision -> chair -> title,
+                    'chair_firstname' => $decision -> chair -> firstname,
+                    'chair_middlename' => $decision -> chair -> middlename,
+                    'chair_lastname' => $decision -> chair -> lastname
+                ];
+                Mail::send('email.conference.pass_manuscript', $data, function($message) use ($to) {
+                    $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Acceptance Letter');
+                });
+            } else if ($request -> status == 0) {
+                $to = [
+                    'email' => $decision -> manuscript -> author -> email,
+                    'name' => $decision -> manuscript -> author -> firstname.' '.$decision -> manuscript -> author -> middlename.' '.$decision -> manuscript -> author -> lastname
+                ];
+                $data = [
+                    'author_title' => $decision -> manuscript -> author -> title,
+                    'author_firstname' => $decision -> manuscript -> author -> firstname,
+                    'author_middlename' => $decision -> manuscript -> author -> middlename,
+                    'author_lastname' => $decision -> manuscript -> author -> lastname,
+                    'manuscript_number' => $decision -> manuscript -> number,
+                    'manuscript_title' => $decision -> manuscript -> title,
+                    'conference' => $decision -> manuscript -> topic -> conference -> title,
+                    'number' => $decision -> manuscript -> topic -> conference -> number,
+                    'chair_title' => $decision -> chair -> title,
+                    'chair_firstname' => $decision -> chair -> firstname,
+                    'chair_middlename' => $decision -> chair -> middlename,
+                    'chair_lastname' => $decision -> chair -> lastname
+                ];
+                Mail::send('email.conference.reject_manuscript', $data, function($message) use ($to) {
+                    $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Notification about Rejecting Manuscript');
+                });
+            } else {
                 $revision = new Revision;
                 $revision -> final_decision_id = $decision -> id;
                 $revision -> comment = $request -> revision_comment;
@@ -273,18 +280,19 @@ class ChairController extends Controller {
                     'manuscript_number' => $decision -> manuscript -> number,
                     'manuscript_title' => $decision -> manuscript -> title,
                     'conference' => $decision -> manuscript -> topic -> conference -> title,
+                    'number' => $decision -> manuscript -> topic -> conference -> number,
                     'deadline' => $revision -> deadline,
                     'chair_title' => $decision -> chair -> title,
                     'chair_firstname' => $decision -> chair -> firstname,
                     'chair_middlename' => $decision -> chair -> middlename,
                     'chair_lastname' => $decision -> chair -> lastname
                 ];
-                Mail::send('email.manuscript_need_revision', $data, function($message) use ($to) {
-                    $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Notification about Revising Manuscript');
+                Mail::send('email.conference.manuscript_need_revision', $data, function($message) use ($to) {
+                    $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Notification about Revising Manuscript');
                 });
             }
+            return view('conference.chair.upload_success');
         }
-        return view('conference.chair.upload_success');
     }
 
     public function Revisions(Request $request) {
@@ -327,16 +335,20 @@ class ChairController extends Controller {
 
     public function MakeReDecision(Request $request) {
         $chair = Auth::user();
-        $decision = FinalDecision::where('manuscript_id', $request -> manuscript_id) -> first();
-        $decision -> chair_id = $chair -> id;
-        $decision -> status = $request -> status;
-        $decision -> comment = $request -> comment;
-        $decision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
-        $decision -> save();
-        $revision = Revision::where('final_decision_id', $decision -> id) -> first();
-        $revision -> status = $request -> status;
-        $revision -> modified_time = Carbon::now() -> format('Y-m-d H:i:s');
-        $revision -> save();
+        $deadline = Manuscript::find($request -> manuscript_id) -> topic -> conference -> exist_deadline;
+        if ($deadline < $request -> deadline) return back() -> with('warn', 'The daedline is not valid!');
+        else {
+            $decision = FinalDecision::where('manuscript_id', $request -> manuscript_id) -> first();
+            $decision -> chair_id = $chair -> id;
+            $decision -> status = $request -> status;
+            $decision -> comment = $request -> comment;
+            $decision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
+            $decision -> save();
+            $revision = Revision::where('final_decision_id', $decision -> id) -> orderBy('id', 'DESC') -> first();
+            $revision -> status = $request -> status;
+            $revision -> modified_time = Carbon::now() -> format('Y-m-d H:i:s');
+            $revision -> save();
+        }
         if ($request -> status == 1) {
             $to = [
                 'email' => $decision -> manuscript -> author -> email,
@@ -350,13 +362,14 @@ class ChairController extends Controller {
                 'manuscript_number' => $decision -> manuscript -> number,
                 'manuscript_title' => $decision -> manuscript -> title,
                 'conference' => $decision -> manuscript -> topic -> conference -> title,
+                'number' => $decision -> manuscript -> topic -> conference -> number,
                 'chair_title' => $decision -> chair -> title,
                 'chair_firstname' => $decision -> chair -> firstname,
                 'chair_middlename' => $decision -> chair -> middlename,
                 'chair_lastname' => $decision -> chair -> lastname
             ];
-            Mail::send('email.pass_revised_manuscript', $data, function($message) use ($to) {
-                $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Notification about Passing Revised Manuscript');
+            Mail::send('email.conference.pass_revised_manuscript', $data, function($message) use ($to) {
+                $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Acceptance Letter');
             });
         } else if ($request -> status == 0) {
             $to = [
@@ -371,46 +384,44 @@ class ChairController extends Controller {
                 'manuscript_number' => $decision -> manuscript -> number,
                 'manuscript_title' => $decision -> manuscript -> title,
                 'conference' => $decision -> manuscript -> topic -> conference -> title,
+                'number' => $decision -> manuscript -> topic -> conference -> number,
                 'chair_title' => $decision -> chair -> title,
                 'chair_firstname' => $decision -> chair -> firstname,
                 'chair_middlename' => $decision -> chair -> middlename,
                 'chair_lastname' => $decision -> chair -> lastname
             ];
-            Mail::send('email.reject_revised_manuscript', $data, function($message) use ($to) {
-                $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Notification about Rejecting Revised Manuscript');
+            Mail::send('email.conference.reject_revised_manuscript', $data, function($message) use ($to) {
+                $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Notification about Rejecting Revised Manuscript');
             });
         } else {
-            $deadline = FinalDecision::find($decision -> id) -> manuscript -> topic -> conference -> exist_deadline;
-            if ($deadline < $request -> deadline) return back() -> with('warn', 'The daedline is not valid!');
-            else {
-                $revision = new Revision;
-                $revision -> final_decision_id = $decision -> id;
-                $revision -> comment = $request -> revision_comment;
-                $revision -> deadline = $request -> deadline;
-                $revision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
-                $revision -> save();
-                $to = [
-                    'email' => $decision -> manuscript -> author -> email,
-                    'name' => $decision -> manuscript -> author -> firstname.' '.$decision -> manuscript -> author -> middlename.' '.$decision -> manuscript -> author -> lastname
-                ];
-                $data = [
-                    'author_title' => $decision -> manuscript -> author -> title,
-                    'author_firstname' => $decision -> manuscript -> author -> firstname,
-                    'author_middlename' => $decision -> manuscript -> author -> middlename,
-                    'author_lastname' => $decision -> manuscript -> author -> lastname,
-                    'manuscript_number' => $decision -> manuscript -> number,
-                    'manuscript_title' => $decision -> manuscript -> title,
-                    'conference' => $decision -> manuscript -> topic -> conference -> title,
-                    'deadline' => $revision -> deadline,
-                    'chair_title' => $decision -> chair -> title,
-                    'chair_firstname' => $decision -> chair -> firstname,
-                    'chair_middlename' => $decision -> chair -> middlename,
-                    'chair_lastname' => $decision -> chair -> lastname
-                ];
-                Mail::send('email.revised_manuscript_need_revision', $data, function($message) use ($to) {
-                    $message -> to($to['email'], $to['name']) -> subject('Online Submission System - Notification about Revising Revised Manuscript');
-                });
-            }
+            $revision = new Revision;
+            $revision -> final_decision_id = $decision -> id;
+            $revision -> comment = $request -> revision_comment;
+            $revision -> deadline = $request -> deadline;
+            $revision -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
+            $revision -> save();
+            $to = [
+                'email' => $decision -> manuscript -> author -> email,
+                'name' => $decision -> manuscript -> author -> firstname.' '.$decision -> manuscript -> author -> middlename.' '.$decision -> manuscript -> author -> lastname
+            ];
+            $data = [
+                'author_title' => $decision -> manuscript -> author -> title,
+                'author_firstname' => $decision -> manuscript -> author -> firstname,
+                'author_middlename' => $decision -> manuscript -> author -> middlename,
+                'author_lastname' => $decision -> manuscript -> author -> lastname,
+                'manuscript_number' => $decision -> manuscript -> number,
+                'manuscript_title' => $decision -> manuscript -> title,
+                'conference' => $decision -> manuscript -> topic -> conference -> title,
+                'number' => $decision -> manuscript -> topic -> conference -> number,
+                'deadline' => $revision -> deadline,
+                'chair_title' => $decision -> chair -> title,
+                'chair_firstname' => $decision -> chair -> firstname,
+                'chair_middlename' => $decision -> chair -> middlename,
+                'chair_lastname' => $decision -> chair -> lastname
+            ];
+            Mail::send('email.conference.revised_manuscript_need_revision', $data, function($message) use ($to) {
+                $message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Notification about Revising Revised Manuscript');
+            });
         }
         return view('conference.chair.upload_success');
     }

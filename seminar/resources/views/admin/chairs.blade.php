@@ -62,7 +62,7 @@
 							<tr>
 								<td>{{ $c + 1 }}</td>
 								<td>
-									<h4>{{ $chair -> title }}{{ $chair -> firstname }} {{ $chair -> middlename }} {{ $chair -> lastname }}</h4>
+									<h4>{{ $chair -> title }} {{ $chair -> firstname }} {{ $chair -> middlename }} {{ $chair -> lastname }}</h4>
 									<p>
 										<i class="fa fa-university"></i> {{ $chair -> institution }}
 									</p>
@@ -80,7 +80,7 @@
 									@if ($chair -> status == 1)
 										<span class="label label-success">Enabled</span>
 									@else
-										<span class="label label-danger">Suspened</span>
+										<span class="label label-danger">Suspended</span>
 									@endif
 								</td>
 								<td>{{ $chair -> added_time }}</td>

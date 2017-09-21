@@ -15,7 +15,7 @@
                                 <table  cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td class="content-block">
-                                            <h3>Welcom to Online Submission System</h3>
+                                            <h3>Welcome to Online Submission and Review System</h3>
                                         </td>
                                     </tr>
                                     <tr>

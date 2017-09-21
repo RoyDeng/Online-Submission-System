@@ -28,6 +28,7 @@
 					<thead>
 						<tr>
 							<th>No.</th>
+							<th>Submission Type</th>
 							<th>ID</th>
                             <th>Title</th>
 							<th>Author</th>
@@ -40,10 +41,11 @@
                         @foreach ($manuscripts as $m => $ms)
 							<tr>
 								<td>{{ $m + 1 }}</td>
+								<td>{{ $ms -> submission_type -> name }}</td>
                                 <td>{{ $ms -> number }}</td>
                                 <td>{{ $ms -> title }}</td>
 								<td>
-									<h4>{{ $ms -> author -> title }}{{ $ms -> author -> firstname }} {{ $ms -> author -> middlename }} {{ $ms -> author -> lastname }}</h4>
+									<h4>{{ $ms -> author -> title }} {{ $ms -> author -> firstname }} {{ $ms -> author -> middlename }} {{ $ms -> author -> lastname }}</h4>
 									<p>
 										<i class="fa fa-university"></i> {{ $ms -> author -> institution }}
 									</p>

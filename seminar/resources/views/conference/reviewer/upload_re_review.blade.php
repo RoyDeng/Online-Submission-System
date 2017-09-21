@@ -57,7 +57,7 @@
                                 <tr>
                                     <th>Author</th>
                                     <td>
-                                        <h4>{{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> title }}{{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> firstname }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> middlename }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> lastname }}</h4>
+                                        <h4>{{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> title }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> firstname }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> middlename }} {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> lastname }}</h4>
                                         <p>
                                             <i class="fa fa-university"></i> {{ $invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> author -> institution }}
                                         </p>
@@ -74,7 +74,7 @@
                                 </tr>
                                 <tr>
                                     <th>Number</th>
-                                    <td>{{$invitation -> revised_manuscript -> revision -> final_decision -> manuscript -> number}}</td>
+                                    <td>{{$invitation -> revised_manuscript -> number}}</td>
                                 </tr>
                                 <tr>
                                     <th>Submission Type</th>
@@ -93,7 +93,7 @@
                                     <td>
                                         <ul class="list-unstyled file-list">
                                             @foreach ($invitation -> revised_manuscript -> revised_file as $file)
-                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}.{{$file -> type}}</a></li>
+                                                <li><a href="/upload/{{$file -> url}}" download>{{$file -> name}}</a></li>
                                             @endforeach
                                         </ul>
                                     </td>
@@ -114,12 +114,14 @@
                     <div class="col-sm-10"><textarea id="comment-author" class="form-control" name="comment_author" rows="10" required></textarea></div>
                 </div>
                 <div class="form-group">
-                    <label for="comment-editor" class="col-sm-2 control-label">Comment to the Editor</label>
-                    <div class="col-sm-10"><textarea id="comment-editor" class="form-control" name="comment_editor" rows="10" required></textarea></div>
+                    <label for="comment-editor" class="col-sm-2 control-label">Comment to the Editor<br/>
+                    <small class="text-navy">optional</small></label>
+                    <div class="col-sm-10"><textarea id="comment-editor" class="form-control" name="comment_editor" rows="10"></textarea></div>
                 </div>
                 <div class="hr-line-dashed"></div>
                 <div class="form-group">
-                    <label class="col-sm-2 control-label">File</label>
+                    <label class="col-sm-2 control-label">File<br/>
+                    <small class="text-navy">optional</small></label>
                     <div class="col-sm-10">
                         <div class="fileinput fileinput-new input-group" data-provides="fileinput">
                             <div class="form-control" data-trigger="fileinput"><i class="glyphicon glyphicon-file fileinput-exists"></i> <span class="fileinput-filename"></span></div>

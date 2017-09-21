@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Hash;
 use Mail;
+use App\Conference\Conference;
 use App\Conference\Topic;
 use App\Conference\Editor;
+use App\Maintainer;
 
 class LoginController extends Controller {
     use AuthenticatesUsers;
@@ -16,11 +18,18 @@ class LoginController extends Controller {
 
     public function __construct() {
         $this -> middleware('guest') -> except('logout');
-    }
+	}
+	
+	function TopicsPage($number) {
+		$conference = Conference::where('number', $number) -> first();
+		if ($conference -> exist_deadline > date('Y-m-d') && $conference -> status == 1) return view('conference.editor.topics', ['conference' => $conference]);
+		else return view('expire_page');
+	}
 
     function LoginPage($number) {
 		$topic = Topic::where('number', $number) -> first();
-		if ($topic -> conference -> exist_deadline > date('Y-m-d') && $topic -> conference -> status == 1 && $topic -> status == 1) return view('conference.editor.login', ['topic' => $topic]);
+		$maintainer = Maintainer::find(1);
+		if ($topic -> conference -> exist_deadline > date('Y-m-d') && $topic -> conference -> status == 1 && $topic -> status == 1) return view('conference.editor.login', ['topic' => $topic, 'maintainer' => $maintainer]);
 		else return view('expire_page');
 	}
 
@@ -49,8 +58,8 @@ class LoginController extends Controller {
 				'password' => $new_password,
 				'number' => $editor -> topic -> conference -> number
 			];
-			Mail::send('email.editor_forgot_password', $data, function($message) use ($to) {
-				$message -> to($to['email'], $to['name']) -> subject('Online Submission System - Editor Password Changed Successfully');
+			Mail::send('email.conference.editor_forgot_password', $data, function($message) use ($to) {
+				$message -> to($to['email'], $to['name']) -> subject('Online Submission and Review System - Editor Password Changed Successfully');
 			});
 			return back() -> with('success', 'A password reset email has been sent!');
 		} else return back() -> with('danger', 'That email does not exist!');

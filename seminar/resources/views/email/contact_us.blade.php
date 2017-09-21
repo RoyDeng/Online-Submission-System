@@ -15,12 +15,12 @@
                                 <table  cellpadding="0" cellspacing="0">
                                     <tr>
                                         <td class="content-block">
-                                            <h3>Question from Online Submission System</h3>
+                                            <h3>Question from Online Submission and Review System</h3>
                                         </td>
                                     </tr>
                                     <tr>
                                         <td class="content-block">
-                                            Questioner: {{ $title }}{{ $firstname }} {{ $middlename }} {{ $lastname }}: 
+                                            Questioner: {{ $title }} {{ $firstname }} {{ $middlename }} {{ $lastname }}: 
                                         </td>
                                     </tr>
                                     <tr>
