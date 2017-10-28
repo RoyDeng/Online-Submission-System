@@ -132,6 +132,15 @@
                 </div>
                 <div class="hr-line-dashed"></div>
                 <div class="form-group">
+					<label class="col-sm-2 control-label">Decision</label>
+                    <div class="col-sm-10">
+                        <label> <input type="radio" value="1" id="status" name="status" checked> Accept </label>
+                        <label> <input type="radio" value="0" id="status" name="status"> Reject </label>
+                        <label> <input type="radio" value="2" id="status" name="status"> Need Revision </label>
+                    </div>
+                </div>
+                <div class="hr-line-dashed"></div>
+                <div class="form-group">
                     <div class="col-sm-4 col-sm-offset-2">
                         <input type="hidden" name="invitation_id" value="{{$invitation -> id}}">
                         <button class="btn btn-primary" type="submit">Submit</button>

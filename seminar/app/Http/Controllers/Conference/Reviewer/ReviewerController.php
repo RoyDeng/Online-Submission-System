@@ -57,6 +57,7 @@ class ReviewerController extends Controller {
             $review -> comment_author = $request -> comment_author;
             $review -> comment_editor = $request -> comment_editor;
             $review -> invitation_id = $request -> invitation_id;
+            $review -> status = $request -> status;
             $review -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
             $review -> save();
             if ($request -> hasFile('file')) {
@@ -180,6 +181,7 @@ class ReviewerController extends Controller {
             $review -> comment_author = $request -> comment_author;
             $review -> comment_editor = $request -> comment_editor;
             $review -> re_invitation_id = $request -> invitation_id;
+            $review -> status = $request -> status;
             $review -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
             $review -> save();
             if ($request -> hasFile('file')) {

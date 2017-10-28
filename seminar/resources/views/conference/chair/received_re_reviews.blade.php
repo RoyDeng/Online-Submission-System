@@ -243,7 +243,7 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="form-label" for="abbreviation">Decision</label>
+						<label class="form-label">Decision</label>
 						<div class="controls">
                             <label> <input type="radio" value="1" id="status" name="status" checked> Accept </label>
                             <label> <input type="radio" value="0" id="status" name="status"> Reject </label>

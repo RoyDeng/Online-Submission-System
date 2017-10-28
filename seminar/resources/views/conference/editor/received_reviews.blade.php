@@ -245,7 +245,7 @@
 						</div>
 					</div>
 					<div class="form-group">
-						<label class="form-label" for="abbreviation">Decision</label>
+						<label class="form-label">Decision</label>
 						<div class="controls">
                             <label> <input type="radio" value="1" id="status" name="status" checked> Accept </label>
                             <label> <input type="radio" value="0" id="status" name="status"> Reject </label>
@@ -304,6 +304,10 @@
                             <td><p id="review_added_time"></p></td>
                         </tr>
                         <tr>
+                            <th>Decision</th>
+                            <td><p id="review_status"></p></td>
+                        </tr>
+                        <tr>
                             <th>Comment to the Author</th>
                             <td><p id="review_comment_author"></p></td>
                         </tr>
@@ -334,8 +338,13 @@
                 $('#review_added_time').text(result.added_time);
 				$('#review_comment_author').text(result.comment_author);
 				$('#review_comment_editor').text(result.comment_editor);
-				$('#review_file_name').text(result.review_file.name);
-                $('#review_file_url').attr('href', '/upload/' + result.review_file.url);
+                if (result.status == 0) $('#review_status').text('Reject');
+                else if (result.status == 1) $('#review_status').text('Accept');
+                else $('#review_status').text('Need Revision');
+				if (result.review_file != "") {
+                    $('#review_file_name').text(result.review_file.name);
+                    $('#review_file_url').attr('href', '/upload/' + result.review_file.url);
+                }
 			}
 		});
 	}

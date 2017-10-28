@@ -54,7 +54,7 @@
         <hr/>
         <div class="row">
             <div class="col-md-12">
-                <i class="fa fa-envelope"></i> {{$maintainer -> email}}
+                Contact: <i class="fa fa-envelope"></i> {{$maintainer -> email}}
             </div>
         </div>
     </div>
