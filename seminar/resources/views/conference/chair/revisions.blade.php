@@ -25,7 +25,7 @@
 </div>
 <div class="wrapper wrapper-content">
     <div class="row">
-        <div class="col-lg-12">
+        <div class="col-lg-8">
             <div class="ibox float-e-margins">
                 <div class="ibox-title">
                     <h5>Initial Manuscript Information</h5>
@@ -90,6 +90,65 @@
                                 </tr>
                             </tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="ibox float-e-margins">
+                <div class="ibox-title">
+                    <h5>Decision from Chair</h5>
+                </div>
+                <div>
+                    <div class="ibox-content">
+                        @if ($manuscript -> final_decision != '')
+                            <table class="table table-bordered">
+                                <tbody>
+                                    <tr>
+                                        <th>Chair</th>
+                                        <td>
+                                            <h4>{{ $manuscript -> final_decision -> chair -> title }}{{ $manuscript -> final_decision -> chair -> firstname }} {{ $manuscript -> final_decision -> chair -> middlename }} {{ $manuscript -> final_decision -> chair -> lastname }}</h4>
+                                            <p>
+                                                <i class="fa fa-university"></i> {{ $manuscript -> final_decision -> chair -> institution }}
+                                            </p>
+                                            <p>
+                                                <i class="fa fa-globe"></i> {{ $manuscript -> final_decision -> chair -> country }}
+                                            </p>
+                                            <p>
+                                                <i class="fa fa-phone"></i> {{ $manuscript -> final_decision -> chair -> tel }}
+                                            </p>
+                                            <p>
+                                                <i class="fa fa-envelope"></i> {{ $manuscript -> final_decision -> chair -> email }}
+                                            </p>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Status</th>
+                                        <td>
+                                            @if ($manuscript -> final_decision -> status == 1)
+                                                <span class="label label-success">Passed</span>
+                                            @elseif ($manuscript -> final_decision -> status == 0)
+                                                <span class="label label-danger">Rejected</span>
+                                            @else
+                                                <span class="label label-warning">Revision is needed</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>Comment</th>
+                                        <td>{{$manuscript -> final_decision -> comment}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Added Time</th>
+                                        <td>{{$manuscript -> final_decision -> added_time}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        @else
+                            <div class="alert alert-danger alert-dismissible fade in">
+                                <strong>You haven't made any decision!</strong>
+                            </div>
+                        @endif
                     </div>
                 </div>
             </div>
