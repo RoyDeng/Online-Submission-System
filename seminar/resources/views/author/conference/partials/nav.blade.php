@@ -24,6 +24,9 @@
 			<li>
 				<a href="{{ url('author/conference/manuscripts') }}/{{ $conference -> number }}"><i class="fa fa-file"></i> <span class="nav-label">Manuscripts</span></a>
 			</li>
+			<li>
+				<a href="{{ url('author/conference/registrations') }}/{{ $conference -> number }}"><i class="fa fa-shopping-cart"></i> <span class="nav-label">Registrations</span></a>
+			</li>
 		</ul>
 	</div>
 </nav>

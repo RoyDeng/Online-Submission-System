@@ -52,7 +52,7 @@
 					<input type="text" class="form-control" name="country" placeholder="Country" required>
 				</div>
 				<button type="submit" class="btn btn-primary block full-width m-b">Register</button>
-				<a href="{{url('author/login')}}"><small>Already have an account?</small></a>
+				<a href="{{url('conference/author/login')}}/{{$conference -> number}}"><small>Already have an account?</small></a>
 			</form>
 			@if ($msg = Session::get('success'))
 				<div class="row">

@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use DB;
 use Hash;
 use Mail;
+use GuzzleHttp\Client;
 use App\Conference\Conference;
 use App\Conference\Topic;
 use App\Conference\ConferenceType;
@@ -22,6 +23,8 @@ use App\Conference\RevisedManuscript;
 use App\Conference\RevisedFile;
 use App\Conference\Editor;
 use App\Conference\ReReview;
+use App\Conference\Registration;
+use App\Conference\RegistrationItem;
 
 class AuthorController extends Controller {
     //研討會頁面
@@ -258,6 +261,102 @@ class AuthorController extends Controller {
     public function GetReReview(Request $request) {
         $review = ReReview::with('re_review_file') -> where('id', $request -> id) -> first();
         return response() -> json($review);
+    }
+
+    public function Registrations($number) {
+        $author = Auth::user();
+        $conference = Conference::where('number', $number) -> first();
+        $registrations = Registration::where('conference_id', $conference -> id) -> where('author_id', $author -> id) -> get();
+        return view('author.conference.registrations', ['conference' => $conference, 'registrations' => $registrations]);
+    }
+
+    public function CreateRegistrationPage($number) {
+        $conference = Conference::where('number', $number) -> first();
+        return view('author.conference.create_registration', ['conference' => $conference]);
+    }
+
+    public function CreateRegistration(Request $request) {
+        if ($request -> amount == 0) return back() -> with('danger', "You haven't selected any registration fee!");
+        else {
+            $author = Auth::user();
+            $registration = new Registration;
+            $registration -> conference_id = $request -> conference_id;
+            $registration -> author_id = $author -> id;
+            $registration -> amount = $request -> amount;
+            $registration -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
+            $registration -> save();
+            $items = $request -> items;
+            foreach ($items as $i => $item) {
+                if ($items[$i]['id'] != 0) {
+                    $r_item = new RegistrationItem;
+                    $r_item -> payment_id = $items[$i]['id'];
+                    $r_item -> registration_id = $registration -> id;
+                    $r_item -> quantity = $items[$i]['quantity'];
+                    $r_item -> save();
+                }
+            }
+            $conference = Conference::find($registration -> conference -> id);
+            $registrations = Registration::where('conference_id', $conference -> id) -> where('author_id', $author -> id) -> get();
+            return redirect() -> action('Author\AuthorController@Registrations', ['number' => $conference -> number]) -> with('success', "You have successfully created the registration!");
+        }
+    }
+
+    public function Registration($id) {
+        $author = Auth::user();
+        $registration = Registration::find($id);
+        $conference = Conference::find($registration -> conference -> id);
+        if ($registration -> author -> id == $author -> id) {
+            $topics = Topic::where('conference_id', $registration -> conference -> id) -> get();
+            $manuscripts = Manuscript::whereIn('topic_id', $topics -> pluck('id') -> toArray()) -> where('author_id', $registration -> author -> id) -> get();
+            return view('author.conference.registration', ['conference' => $conference, 'registration' => $registration, 'manuscripts' => $manuscripts]);
+        } else {
+            $registrations = Registration::where('conference_id', $conference -> id) -> where('author_id', $author -> id) -> get();
+            return redirect() -> action('Author\AuthorController@Registrations', ['number' => $conference -> number]);
+        }
+    }
+
+    public function CheckoutRegistration(Request $request) {
+        $client = new Client();
+        $response = $client -> post('https://pay.cycu.edu.tw/fintech/credit/', [
+            'json' => [
+                'app_id' => 2001,
+                'app_token' => 'db598da442157ecd804503b20012751f',
+                'app_pk' => $request -> id,
+                'amount' => round($request -> amount),
+                'note' => mb_substr($request -> note, 0, 200, 'utf-8'),
+                'app_return_url' => 'http://140.135.97.27/author/conference/complete_registration/'.$request -> id
+            ]
+        ]);
+        $body = json_decode($response -> getBody());
+        $registration = Registration::find($request -> id);
+        $registration -> tx_seq = $body -> tx_seq;
+        $registration -> save();
+        return redirect($body -> url);
+    }
+
+    public function CompleteRegistration($id) {
+        $author = Auth::user();
+        $registration = Registration::find($id);
+        if ($registration -> author -> id == $author -> id) {
+            $client = new Client();
+            $response = $client -> post('https://pay.cycu.edu.tw/fintech/fetch/', [
+                'json' => [
+                    'app_id' => 2001,
+                    'app_token' => 'db598da442157ecd804503b20012751f',
+                    'tx_seq' => $registration -> tx_seq
+                ]
+            ]);
+            $body = json_decode($response -> getBody(), true);
+            if ($body['dataList'][0]['tx_status'] == '自動銷帳成功') {
+                $registration -> status = 1;
+                $registration -> modified_time = Carbon::now() -> format('Y-m-d H:i:s');
+                $registration -> save();
+                return redirect() -> action('Author\AuthorController@Registration', ['id' => $registration -> id]) -> with('success', "You have successfully checked the registration!");
+            } else return redirect() -> action('Author\AuthorController@Registration', ['id' => $registration -> id]) -> with('danger', "You haven't checked the registration!");
+        } else {
+            $registrations = Registration::where('conference_id', $conference -> id) -> where('author_id', $author -> id) -> get();
+            return redirect() -> action('Author\AuthorController@Registrations', ['number' => $conference -> number]);
+        }
     }
 
     public function Profile($number) {

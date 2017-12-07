@@ -164,30 +164,14 @@
                                     <thead>
                                         <tr>
                                             <th>No.</th>
-                                            <th>Reviewer</th>
                                             <th>Reply Time</th>
-                                            <th>Action</th>
+                                            <th>Detail</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($invitations as $i => $invitation)
                                             <tr>
                                                 <td>{{ $i + 1 }}</td>
-                                                <td>
-                                                    <h4>{{ $invitation -> reviewer -> title }} {{ $invitation -> reviewer -> firstname }} {{ $invitation -> reviewer -> middlename }} {{ $invitation -> reviewer -> lastname }}</h4>
-                                                    <p>
-                                                        <i class="fa fa-university"></i> {{ $invitation -> reviewer -> institution }}
-                                                    </p>
-                                                    <p>
-                                                        <i class="fa fa-globe"></i> {{ $invitation -> reviewer -> country }}
-                                                    </p>
-                                                    <p>
-                                                        <i class="fa fa-phone"></i> {{ $invitation -> reviewer -> tel }}
-                                                    </p>
-                                                    <p>
-                                                        <i class="fa fa-envelope"></i> {{ $invitation -> reviewer -> email }}
-                                                    </p>
-                                                </td>
                                                 <td>{{ $invitation -> modified_time }}</td>
                                                 <td>
                                                     <button type="button" class="btn btn-primary" data-target="#GetReview" data-toggle="modal" onclick="GetReview('{{ $invitation -> review -> id }}')"><i class="fa fa-eye"></i></button>

@@ -22,10 +22,16 @@
 				<a href="{{ url('conference/chair/conference') }}"><i class="fa fa-graduation-cap"></i> <span class="nav-label">Conference</span></a>
 			</li>
 			<li>
+				<a href="{{ url('conference/chair/payment') }}"><i class="fa fa-money"></i> <span class="nav-label">Payment</span></a>
+			</li>
+			<li>
 				<a href="{{ url('conference/chair') }}"><i class="fa fa-comments"></i> <span class="nav-label">Topics</span></a>
 			</li>
 			<li>
 				<a href="{{ url('conference/chair/manuscripts') }}"><i class="fa fa-file"></i> <span class="nav-label">Manuscripts</span></a>
+			</li>
+			<li>
+				<a href="{{ url('conference/chair/registrations') }}"><i class="fa fa-shopping-cart"></i> <span class="nav-label">Registrations</span></a>
 			</li>
 		</ul>
 	</div>

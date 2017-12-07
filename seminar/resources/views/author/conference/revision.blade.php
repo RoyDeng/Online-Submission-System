@@ -83,30 +83,14 @@
                                     <thead>
                                         <tr>
                                             <th>No.</th>
-                                            <th>Reviewer</th>
                                             <th>Reply Time</th>
-                                            <th>Action</th>
+                                            <th>Detail</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @foreach ($revision -> revised_manuscript -> re_invitation -> where('status', 1) as $i => $invitation)
                                             <tr>
                                                 <td>{{ $i + 1 }}</td>
-                                                <td>
-                                                    <h4>{{ $invitation -> reviewer -> title }} {{ $invitation -> reviewer -> firstname }} {{ $invitation -> reviewer -> middlename }} {{ $invitation -> reviewer -> lastname }}</h4>
-                                                    <p>
-                                                        <i class="fa fa-university"></i> {{ $invitation -> reviewer -> institution }}
-                                                    </p>
-                                                    <p>
-                                                        <i class="fa fa-globe"></i> {{ $invitation -> reviewer -> country }}
-                                                    </p>
-                                                    <p>
-                                                        <i class="fa fa-phone"></i> {{ $invitation -> reviewer -> tel }}
-                                                    </p>
-                                                    <p>
-                                                        <i class="fa fa-envelope"></i> {{ $invitation -> reviewer -> email }}
-                                                    </p>
-                                                </td>
                                                 <td>{{ $invitation -> modified_time }}</td>
                                                 <td>
                                                     @if ($invitation -> status == 1)

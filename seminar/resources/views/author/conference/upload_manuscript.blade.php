@@ -48,7 +48,7 @@
                 <div class="form-group">
                     <label for="submission-type" class="col-sm-2 control-label">Submission Type</label>
                     <div class="col-sm-10">
-                        <select id="submission-type" class="form-control m-b" name="submission_type_id">
+                        <select id="submission-type" class="form-control m-b" name="submission_type_id" required>
                             @foreach ($topic -> conference -> conference_type as $type)
                                 @if ($type -> status == 1)
                                     <option value="{{ $type -> submission_type -> id }}">{{ $type -> submission_type -> name }}</option>

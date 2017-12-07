@@ -45,7 +45,7 @@
                         <p class="text-muted text-center">
                             <small>Do not have an account?</small>
                         </p>
-						<a class="btn btn-sm btn-white btn-block" href="{{url('author/register')}}">Create an Account</a>
+						<a class="btn btn-sm btn-white btn-block" href="{{url('author/register')}}/{{$conference -> number}}">Create an Account</a>
                     </form>
                     <p class="m-t"> <small>Copyright © {{ date("Y") }} Chung Yuan Christian University All Rights</small> </p>
                 </div>

@@ -53,6 +53,13 @@ Route::prefix('conference')->group(function () {
         Route::get('conference', 'Conference\Chair\ChairController@Conference');
         Route::post('edit_conference', 'Conference\Chair\ChairController@EditConference');
 
+        //付款
+        Route::get('payment', 'Conference\Chair\ChairController@Payment');
+        Route::post('create_payment', 'Conference\Chair\ChairController@CreatePayment');
+        Route::get('get_payment', 'Conference\Chair\ChairController@GetPayment');
+        Route::post('edit_payment', 'Conference\Chair\ChairController@EditPayment');
+        Route::post('del_payment', 'Conference\Chair\ChairController@DelPayment');
+
         //題目
         Route::get('/', 'Conference\Chair\ChairController@Topics') -> name('chair');
         Route::post('create_topic', 'Conference\Chair\ChairController@CreateTopic');
@@ -79,6 +86,10 @@ Route::prefix('conference')->group(function () {
         Route::get('get_re_review', 'Conference\Chair\ChairController@GetReReview');
         Route::get('get_re_reply', 'Conference\Chair\ChairController@GetReReply');
         Route::post('make_re_decision', 'Conference\Chair\ChairController@MakeReDecision');
+
+        //登記
+        Route::get('registrations', 'Conference\Chair\ChairController@Registrations');
+        Route::get('registration/{id}', 'Conference\Chair\ChairController@Registration');
 
         //個人資料
         Route::get('profile', 'Conference\Chair\ChairController@Profile');
@@ -172,7 +183,7 @@ Route::get('conference/author/login/{number}', 'Author\LoginController@LoginPage
 Route::post('conference/author/login', 'Author\LoginController@login');
 Route::get('author/forgot_password', 'Author\LoginController@ForgotPasswordPage');
 Route::post('author/reset_password', 'Author\LoginController@ResetPassword');
-Route::get('author/register', 'Author\LoginController@RegisterPage') -> name('register');
+Route::get('author/register/{number}', 'Author\LoginController@RegisterPage') -> name('register');
 Route::post('author/register', 'Author\LoginController@register');
 
 //需要驗證的路徑
@@ -195,6 +206,14 @@ Route::group(['middleware' => ['auth:author'], 'prefix' => 'author'], function()
     Route::post('conference/upload_revision', 'Author\AuthorController@UploadRevision');
     Route::get('conference/revision/{id}', 'Author\AuthorController@Revision');
     Route::get('conference/get_re_review/{id}', 'Author\AuthorController@GetReReview');
+
+    //登記
+    Route::get('conference/registrations/{number}', 'Author\AuthorController@Registrations');
+    Route::get('conference/create_registration/{number}', 'Author\AuthorController@CreateRegistrationPage');
+    Route::post('conference/create_registration', 'Author\AuthorController@CreateRegistration');
+    Route::get('conference/registration/{id}', 'Author\AuthorController@Registration');
+    Route::post('conference/checkout_registration', 'Author\AuthorController@CheckoutRegistration');
+    Route::get('conference/complete_registration/{id}', 'Author\AuthorController@CompleteRegistration');
 
     //個人資料
     Route::get('conference/profile/{number}', 'Author\AuthorController@Profile');

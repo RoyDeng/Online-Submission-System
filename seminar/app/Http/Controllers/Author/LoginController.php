@@ -55,8 +55,9 @@ class LoginController extends Controller {
 	}
 
 	//作者註冊頁面
-	function RegisterPage() {
-		return view('author.register');
+	function RegisterPage($number) {
+		$conference = Conference::where('number', $number) -> first();
+		return view('author.register', ['conference' => $conference]);
 	}
 
 	//作者註冊操作

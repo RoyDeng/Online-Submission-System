@@ -45,5 +45,25 @@
                     $('#need-revision').remove();
                 }
             });
+
+            var $tblrows = $("#registration-fee tbody tr");
+            $tblrows.each(function(index){
+                var $tblrow = $(this);
+                $tblrow.find('.quantity').on('change', function(){
+                    var quantity = $tblrow.find('.quantity').val();
+                    var price = $tblrow.find('.price').text();
+                    var subTotal = parseInt(quantity, 10) * parseFloat(price);
+                    if (!isNaN(subTotal)) {
+                        $tblrow.find('.sub-total').text(subTotal);
+                        var grandTotal = 0;
+                        $(".sub-total").each(function(){
+                            var stval = parseFloat($(this).text());
+                            grandTotal += isNaN(stval) ? 0 : stval;
+                        });
+                        $('.input-total').val(grandTotal);
+                        $('.text-total').text(grandTotal);
+                    }
+                });
+            });
         });
     </script>

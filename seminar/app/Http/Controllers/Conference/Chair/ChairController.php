@@ -10,6 +10,7 @@ use Hash;
 use Mail;
 use App\Conference\Conference;
 use App\Conference\ConferenceType;
+use App\Conference\Payment;
 use App\Conference\Topic;
 use App\Conference\Editor;
 use App\Conference\Manuscript;
@@ -19,6 +20,7 @@ use App\Conference\FinalDecision;
 use App\Conference\Revision;
 use App\Conference\ReInvitation;
 use App\Conference\ReReview;
+use App\Conference\Registration;
 
 class ChairController extends Controller {
     public function Conference() {
@@ -56,6 +58,47 @@ class ChairController extends Controller {
             $conference_type_full_paper -> save();
             return back() -> with('success', 'You have successfully updated the conference!');
         }
+    }
+
+    public function Payment() {
+        $chair = Auth::user();
+        $conference = Conference::find($chair -> conference_id);
+        $payment = Payment::where('conference_id', $conference -> id) -> orderBy('added_time', 'desc') -> get();
+        return view('conference.chair.payment', ['conference' => $conference, 'payment' => $payment]);
+    }
+
+    public function CreatePayment(Request $request) {
+        $chair = Auth::user();
+        $conference = Conference::find($chair -> conference_id);
+        $payment = new Payment;
+        $payment -> conference_id = $conference -> id;
+        $payment -> name = $request -> name;
+        $payment -> price = $request -> price;
+        $payment -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
+        $payment -> save();
+        return back() -> with('success', 'You have successfully created a payment!');
+    }
+
+    public function GetPayment(Request $request) {
+		if ($request -> ajax()) {
+            $payment = Payment::find($request -> id);
+			return response() -> json($payment);
+		}
+    }
+    
+    public function EditPayment(Request $request) {
+        $payment = Payment::find($request -> id);
+        $payment -> name = $request -> name;
+        $payment -> price = $request -> price;
+        $payment -> modified_time = Carbon::now() -> format('Y-m-d H:i:s');
+        $payment -> save();
+        return back() -> with('success', 'You have successfully updated the payment!');
+    }
+
+    public function DelPayment(Request $request) {
+        $payment = Payment::find($request -> id);
+        $payment -> delete();
+        return back() -> with('success', 'You have successfully deleted the payment!');
     }
 
     public function Topics() {
@@ -424,6 +467,23 @@ class ChairController extends Controller {
             });
         }
         return view('conference.chair.upload_success');
+    }
+
+    public function Registrations() {
+        $chair = Auth::user();
+        $conference = Conference::find($chair -> conference_id);
+        $registrations = Registration::where('conference_id', $conference -> id) -> get();
+        return view('conference.chair.registrations', ['conference' => $conference, 'registrations' => $registrations]);
+    }
+
+    public function Registration(Request $request) {
+        $chair = Auth::user();
+        $registration = Registration::find($request -> id);
+        if ($registration -> conference -> id == $chair -> conference_id) {
+            $topics = Topic::where('conference_id', $registration -> conference -> id) -> get();
+            $manuscripts = Manuscript::whereIn('topic_id', $topics -> pluck('id') -> toArray()) -> where('author_id', $registration -> author -> id) -> get();
+            return view('conference.chair.registration', ['registration' => $registration, 'manuscripts' => $manuscripts]);
+        } else return redirect() -> action('Conference\Chair\ChairController@Registrations');
     }
 
     public function Profile() {
