@@ -283,11 +283,12 @@ class AuthorController extends Controller {
             $registration -> conference_id = $request -> conference_id;
             $registration -> author_id = $author -> id;
             $registration -> amount = $request -> amount;
+            $registration -> note = $request -> note;
             $registration -> added_time = Carbon::now() -> format('Y-m-d H:i:s');
             $registration -> save();
             $items = $request -> items;
             foreach ($items as $i => $item) {
-                if ($items[$i]['id'] != 0) {
+                if ($items[$i]['quantity'] != 0) {
                     $r_item = new RegistrationItem;
                     $r_item -> payment_id = $items[$i]['id'];
                     $r_item -> registration_id = $registration -> id;
@@ -297,7 +298,7 @@ class AuthorController extends Controller {
             }
             $conference = Conference::find($registration -> conference -> id);
             $registrations = Registration::where('conference_id', $conference -> id) -> where('author_id', $author -> id) -> get();
-            return redirect() -> action('Author\AuthorController@Registrations', ['number' => $conference -> number]) -> with('success', "You have successfully created the registration!");
+            return redirect() -> action('Author\AuthorController@Registrations', ['number' => $conference -> number]) -> with('success', "You have successfully created the registration! Please continue to pay by credit card (press 'Action' icon).");
         }
     }
 

@@ -19,7 +19,7 @@
     <div class="col-sm-8">
 		<div class="title-action">
 			@if ($registration -> status == 0)
-                <button type="button" class="btn btn-primary" data-target="#CheckoutRegistration" data-toggle="modal">Checkout(Paying by Credit Card)</button>
+                <button type="button" class="btn btn-primary" data-target="#CheckoutRegistration" data-toggle="modal">Checkout (Paying by Credit Card)</button>
 			@endif
 		</div>
 	</div>
@@ -219,7 +219,7 @@
 		<div class="modal-content">
 			<div class="modal-header">
 				<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-				<h4 class="modal-title">Check the Registration(Paying by Credit Card)</h4>
+				<h4 class="modal-title">Check the Registration (Paying by Credit Card)</h4>
 			</div>
 			<div class="modal-body">
 				<i class="fa fa-question-circle fa-lg"></i>  
